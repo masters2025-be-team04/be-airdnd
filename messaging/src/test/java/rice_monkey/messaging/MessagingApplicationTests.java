@@ -1,10 +1,10 @@
-package rice_monkey.chatting;
+package rice_monkey.messaging;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class ChattingApplicationTests {
+class MessagingApplicationTests {
 
 	@Test
 	void contextLoads() {
