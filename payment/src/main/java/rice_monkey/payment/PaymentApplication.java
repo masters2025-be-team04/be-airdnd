@@ -1,13 +1,13 @@
-package rice_monkey.chatting;
+package rice_monkey.payment;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class ChattingApplication {
+public class PaymentApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(ChattingApplication.class, args);
+		SpringApplication.run(PaymentApplication.class, args);
 	}
 
 }
