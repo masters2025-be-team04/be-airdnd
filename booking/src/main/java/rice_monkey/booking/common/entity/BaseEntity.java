@@ -3,6 +3,8 @@ package rice_monkey.booking.common.entity;
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.MappedSuperclass;
+import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 import org.springframework.data.annotation.CreatedDate;
@@ -17,6 +19,8 @@ import java.time.LocalDateTime;
         "SET deleted = true, updated_at = now()" +
         "WHERE id = ?")
 @SQLRestriction("deleted = false")
+@Getter
+@Setter
 public abstract class BaseEntity {
 
     @CreatedDate
