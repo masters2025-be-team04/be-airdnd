@@ -10,6 +10,7 @@ import rice_monkey.listing.domain.*;
 import rice_monkey.listing.dto.*;
 import rice_monkey.listing.exception.ListingNotFoundException;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -62,6 +63,15 @@ public class ListingService {
     @Transactional(readOnly = true)
     public List<ListingListQueryResponse> getListingListWithQuery(ListingSearchCondition condition){
         List<Listing> listings = listingRepository.findAllByCondition(condition);
+        List<ListingListQueryResponse> responses = new ArrayList<>();
+        for (Listing listing : listings) {
+            Double avgRating = getAvgRating(listing);
+            Integer listingCommentCountingNumber = getListingCommentNumber(listing);
+            List<TagResponse> tagResponses = switchToTagResponse(listing);
+            ListingListQueryResponse switchingResponse = ListingListQueryResponse.switching(listing, avgRating, listingCommentCountingNumber, tagResponses);
+            responses.add(switchingResponse);
+        }
+        return responses;
     }
 
 
@@ -75,8 +85,19 @@ public class ListingService {
         return new ListingPricesMetaData(countPerPrice, avgPrice, maxPrice, minPrice);
     }
 
-    private Double getAverageActiveRating(Listing listing) {
-        return listingCommentRepository.findCommentRatingAvg(listing.getId(), CommentStatus.ACTIVE);
+
+    private Double getAvgRating(Listing listing) {
+        return listingCommentRepository.findCommentRatingAvg(listing.getId(),CommentStatus.ACTIVE);
+    }
+
+    private Integer getListingCommentNumber(Listing listing) {
+        return listingCommentRepository.countByListingIdAndStatus(listing.getId(),CommentStatus.ACTIVE);
+    }
+
+    private List<TagResponse> switchToTagResponse(Listing listing) {
+        return listing.getTags().stream()
+                .map(TagResponse::fromTag)
+                .toList();
     }
 
 
