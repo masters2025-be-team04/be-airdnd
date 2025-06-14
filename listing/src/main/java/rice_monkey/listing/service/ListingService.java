@@ -4,23 +4,23 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import rice_monkey.listing.Repository.ListingRepository;
-import rice_monkey.listing.Repository.StayCommentRepository;
+import rice_monkey.listing.Repository.ListingCommentRepository;
 import rice_monkey.listing.Repository.TagRepository;
 import rice_monkey.listing.domain.*;
-import rice_monkey.listing.dto.ListingCreateRequest;
-import rice_monkey.listing.dto.ListingDetailResponse;
-import rice_monkey.listing.dto.ListingListQueryResponse;
-import rice_monkey.listing.dto.ListingSearchCondition;
+import rice_monkey.listing.dto.*;
 import rice_monkey.listing.exception.ListingNotFoundException;
 
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class ListingService {
 
     private final ListingRepository listingRepository;
-    private final StayCommentRepository stayCommentRepository;
+    private final ListingCommentRepository listingCommentRepository;
     private final TagRepository tagRepository;
 
     @Transactional
@@ -64,8 +64,47 @@ public class ListingService {
         List<Listing> listings = listingRepository.findAllByCondition(condition);
     }
 
+
+    @Transactional(readOnly = true)
+    public ListingPricesMetaData getListingPricesMetaData() {
+        List<Integer> allPrices = listingRepository.findAllPrices();
+        Map<Integer, Long> countPerPrice = getCountPerPrice(allPrices);
+        int avgPrice = calculateAvgPrice(allPrices);
+        int maxPrice = calculateMaxPrice(allPrices);
+        int minPrice = calculateMinPrice(allPrices);
+        return new ListingPricesMetaData(countPerPrice, avgPrice, maxPrice, minPrice);
+    }
+
     private Double getAverageActiveRating(Listing listing) {
-        return stayCommentRepository.findCommentRatingAvg(listing.getId(), CommentStatus.ACTIVE);
+        return listingCommentRepository.findCommentRatingAvg(listing.getId(), CommentStatus.ACTIVE);
+    }
+
+
+
+    private int calculateAvgPrice(List<Integer> prices) {
+        return (int) prices.stream()
+                .mapToInt(Integer::intValue)
+                .average()
+                .orElse(0);
+    }
+
+    private int calculateMaxPrice(List<Integer> prices) {
+        return prices.stream()
+                .mapToInt(Integer::intValue)
+                .max()
+                .orElse(0);
+    }
+
+    private int calculateMinPrice(List<Integer> prices) {
+        return prices.stream()
+                .mapToInt(Integer::intValue)
+                .min()
+                .orElse(0);
+    }
+
+    private Map<Integer, Long> getCountPerPrice(List<Integer> prices) {
+        return prices.stream()
+                .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
     }
 
 

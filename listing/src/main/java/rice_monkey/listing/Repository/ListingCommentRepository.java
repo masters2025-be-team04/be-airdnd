@@ -8,7 +8,7 @@ import rice_monkey.listing.domain.ListingComment;
 
 import java.util.List;
 
-public interface StayCommentRepository extends JpaRepository<ListingComment, Long> {
+public interface ListingCommentRepository extends JpaRepository<ListingComment, Long> {
 
     List<ListingComment> findCommentsByListingIdAndStatus(Long stayId, CommentStatus status);
 
