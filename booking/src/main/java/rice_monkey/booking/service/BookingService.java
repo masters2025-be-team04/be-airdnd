@@ -4,6 +4,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import rice_monkey.booking.common.constants.BookingConstant;
+import rice_monkey.booking.common.constants.RedisConstant;
 import rice_monkey.booking.dao.BookingEventRepository;
 import rice_monkey.booking.dao.BookingRepository;
 import rice_monkey.booking.domain.Booking;
@@ -11,6 +13,11 @@ import rice_monkey.booking.domain.BookingEvent;
 import rice_monkey.booking.domain.BookingState;
 import rice_monkey.booking.dto.request.BookingReserveRequestDto;
 import rice_monkey.booking.dto.response.BookingReserveResponseDto;
+import rice_monkey.booking.dto.response.BookingResponseDto;
+import rice_monkey.booking.exception.booking.BookingNotFoundException;
+import rice_monkey.booking.exception.booking.ListingUnavailableException;
+import rice_monkey.booking.exception.Authorization.UnauthorizedBookingAccessException;
+import rice_monkey.booking.exception.booking.AlreadyBookedException;
 import rice_monkey.booking.feign.ListingClient;
 import rice_monkey.booking.feign.dto.ListingDto;
 
@@ -26,15 +33,15 @@ public class BookingService {
 
     @Transactional
     public BookingReserveResponseDto reserve(BookingReserveRequestDto dto, Long guestId) throws JsonProcessingException {
-        String key = "lock:listing:" + dto.listingId();
+        String key = RedisConstant.LOCK_LISTING + dto.listingId();
         if (!redisLockService.acquire(key)) {
-            throw new IllegalStateException("already booked");
+            throw new AlreadyBookedException(dto.listingId());
         }
 
         try {
             ListingDto listing = listingClient.find(dto.listingId());
-            if (!listing.status().equals("PUBLISHED")) {
-                throw new IllegalStateException("listing is not available");
+            if (!listing.status().equals(BookingConstant.LISTING_PUBLISHED)) {
+                throw new ListingUnavailableException(dto.listingId(), listing.status());
             }
 
             Booking booking = Booking.builder()
@@ -48,7 +55,7 @@ public class BookingService {
                     .listingTitleSnapshot(listing.name())
                     .build();
             bookingRepository.save(booking);
-            bookingEventRepository.save(BookingEvent.of("BOOKING_REQUESTED", booking));
+            bookingEventRepository.save(BookingEvent.of(BookingConstant.BOOKING_REQUESTED, booking));
 
             return BookingReserveResponseDto.from(booking);
         } finally {
@@ -56,11 +63,24 @@ public class BookingService {
         }
     }
 
+    @Transactional(readOnly = true)
+    public BookingResponseDto getBooking(Long id, Long userId) {
+        Booking booking = bookingRepository.findById(id)
+                .orElseThrow(() -> new BookingNotFoundException(id));
+
+        if (!booking.getGuestId().equals(userId)) {
+            throw new UnauthorizedBookingAccessException(id, userId);
+        }
+        return BookingResponseDto.from(booking);
+    }
+
     @Transactional
     public void confirm(Long id) throws JsonProcessingException {
-        Booking booking = bookingRepository.findById(id).orElseThrow();
+        Booking booking = bookingRepository.findById(id)
+                .orElseThrow(() -> new BookingNotFoundException(id));
+
         booking.setStatus(BookingState.CONFIRMED);
-        bookingEventRepository.save(BookingEvent.of("BOOKING_CONFIRMED", booking));
+        bookingEventRepository.save(BookingEvent.of(BookingConstant.BOOKING_CONFIRMED, booking));
     }
 
 }

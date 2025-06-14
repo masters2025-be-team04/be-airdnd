@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import rice_monkey.booking.dto.request.BookingReserveRequestDto;
 import rice_monkey.booking.dto.response.BookingReserveResponseDto;
+import rice_monkey.booking.dto.response.BookingResponseDto;
 import rice_monkey.booking.service.BookingService;
 
 @RestController
@@ -14,6 +15,13 @@ import rice_monkey.booking.service.BookingService;
 public class BookingController {
 
     private final BookingService bookingService;
+
+    @GetMapping("/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    public BookingResponseDto getBooking(@PathVariable Long id,
+                                         @RequestHeader("X-User-Id") Long userId) {
+        return bookingService.getBooking(id, userId);
+    }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
