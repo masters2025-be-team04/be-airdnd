@@ -56,4 +56,11 @@ public class BookingService {
         }
     }
 
+    @Transactional
+    public void confirm(Long id) throws JsonProcessingException {
+        Booking booking = bookingRepository.findById(id).orElseThrow();
+        booking.setStatus(BookingState.CONFIRMED);
+        bookingEventRepository.save(BookingEvent.of("BOOKING_CONFIRMED", booking));
+    }
+
 }
