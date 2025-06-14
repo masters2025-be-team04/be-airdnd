@@ -26,6 +26,7 @@ public class Booking extends BaseEntity {
     private Integer guestCount;
     private Integer paymentAmount;
     private String listingTitleSnapshot;
+    @Builder.Default
     @Enumerated(EnumType.STRING)
     private BookingState status = BookingState.REQUESTED;
 
