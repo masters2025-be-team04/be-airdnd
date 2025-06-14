@@ -1,5 +1,6 @@
 package rice_monkey.booking.api;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -29,6 +30,14 @@ public class BookingController {
                                              @RequestHeader("X-User-Id") Long userId
     ) throws Exception {
         return bookingService.reserve(req, userId);
+    }
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void cancel(@PathVariable Long id,
+                       @RequestHeader("X-User-Id") Long userId
+    ) throws Exception {
+        bookingService.cancelBooking(id, userId);
     }
 
 }

@@ -75,6 +75,19 @@ public class BookingService {
     }
 
     @Transactional
+    public void cancelBooking(long id, long userId) throws JsonProcessingException {
+        Booking booking = bookingRepository.findById(id)
+                .orElseThrow(() -> new BookingNotFoundException(id));
+
+        if (!booking.getGuestId().equals(userId)) {
+            throw new UnauthorizedBookingAccessException(id, userId);
+        }
+
+        booking.setStatus(BookingState.CANCELED);
+        bookingEventRepository.save(BookingEvent.of(BookingConstant.BOOKING_CANCELED, booking));
+    }
+
+    @Transactional
     public void confirm(Long id) throws JsonProcessingException {
         Booking booking = bookingRepository.findById(id)
                 .orElseThrow(() -> new BookingNotFoundException(id));
