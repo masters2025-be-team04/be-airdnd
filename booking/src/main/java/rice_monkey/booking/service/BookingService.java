@@ -85,6 +85,7 @@ public class BookingService {
 
         booking.setStatus(BookingState.CANCELED);
         bookingEventRepository.save(BookingEvent.of(BookingConstant.BOOKING_CANCELED, booking));
+        bookingRepository.delete(booking);
     }
 
     @Transactional

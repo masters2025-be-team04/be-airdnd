@@ -2,10 +2,9 @@ package rice_monkey.booking.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
+import rice_monkey.booking.common.entity.BaseEntity;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "booking")
@@ -14,7 +13,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Booking {
+public class Booking extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,7 +28,5 @@ public class Booking {
     private String listingTitleSnapshot;
     @Enumerated(EnumType.STRING)
     private BookingState status = BookingState.REQUESTED;
-    @CreationTimestamp
-    private LocalDateTime createdAt;
 
 }
