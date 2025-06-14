@@ -4,10 +4,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import rice_monkey.listing.domain.Listing;
-import rice_monkey.listing.dto.ListingCreateRequest;
-import rice_monkey.listing.dto.ListingDetailResponse;
-import rice_monkey.listing.dto.ListingSearchCondition;
+import rice_monkey.listing.dto.*;
 import rice_monkey.listing.service.ListingService;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/listings")
@@ -30,13 +30,17 @@ public class ListingController {
 
 
     @GetMapping
-    public void queryListingList(@ModelAttribute ListingSearchCondition condition){
-        listingService.
+    public List<ListingListQueryResponse> queryListingList(@ModelAttribute ListingSearchCondition condition){
+        return listingService.getListingListWithQuery(condition);
     }
 
-    private Double getActiveRating(Listing listing){
-        return
+
+    @GetMapping("/prices_meta")
+    public ListingPricesMetaData getListingPricesMetaData(){
+        return listingService.getListingPricesMetaData();
     }
+
+
 
 
 }
