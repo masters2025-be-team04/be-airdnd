@@ -9,8 +9,8 @@ import rice_monkey.booking.dao.BookingRepository;
 import rice_monkey.booking.domain.Booking;
 import rice_monkey.booking.domain.BookingEvent;
 import rice_monkey.booking.domain.BookingState;
-import rice_monkey.booking.dto.request.NewBookingDto;
-import rice_monkey.booking.dto.response.BookingDto;
+import rice_monkey.booking.dto.request.BookingReserveRequestDto;
+import rice_monkey.booking.dto.response.BookingReserveResponseDto;
 import rice_monkey.booking.feign.ListingClient;
 import rice_monkey.booking.feign.dto.ListingDto;
 
@@ -25,7 +25,7 @@ public class BookingService {
     private final RedisLockService redisLockService;
 
     @Transactional
-    public BookingDto reserve(NewBookingDto dto, Long guestId) throws JsonProcessingException {
+    public BookingReserveResponseDto reserve(BookingReserveRequestDto dto, Long guestId) throws JsonProcessingException {
         String key = "lock:listing:" + dto.listingId();
         if (!redisLockService.acquire(key)) {
             throw new IllegalStateException("already booked");
@@ -50,7 +50,7 @@ public class BookingService {
             bookingRepository.save(booking);
             bookingEventRepository.save(BookingEvent.of("BOOKING_REQUESTED", booking));
 
-            return BookingDto.from(booking);
+            return BookingReserveResponseDto.from(booking);
         } finally {
             redisLockService.release(key);
         }

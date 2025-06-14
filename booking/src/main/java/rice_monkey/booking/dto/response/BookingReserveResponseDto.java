@@ -5,7 +5,7 @@ import rice_monkey.booking.domain.Booking;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-public record BookingDto(
+public record BookingReserveResponseDto(
         long id,
         long listingId,
         String state,
@@ -25,8 +25,8 @@ public record BookingDto(
     ) {
     }
 
-    public static BookingDto from(Booking booking) {
-        return new BookingDto(
+    public static BookingReserveResponseDto from(Booking booking) {
+        return new BookingReserveResponseDto(
                 booking.getId(),
                 booking.getListingId(),
                 booking.getStatus().name(),

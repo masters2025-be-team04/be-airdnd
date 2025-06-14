@@ -4,8 +4,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import rice_monkey.booking.dto.request.NewBookingDto;
-import rice_monkey.booking.dto.response.BookingDto;
+import rice_monkey.booking.dto.request.BookingReserveRequestDto;
+import rice_monkey.booking.dto.response.BookingReserveResponseDto;
 import rice_monkey.booking.service.BookingService;
 
 @RestController
@@ -17,8 +17,8 @@ public class BookingController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public BookingDto reserve(@Valid @RequestBody NewBookingDto req,
-                              @RequestHeader("X-User-Id") Long userId
+    public BookingReserveResponseDto reserve(@Valid @RequestBody BookingReserveRequestDto req,
+                                             @RequestHeader("X-User-Id") Long userId
     ) throws Exception {
         return bookingService.reserve(req, userId);
     }
