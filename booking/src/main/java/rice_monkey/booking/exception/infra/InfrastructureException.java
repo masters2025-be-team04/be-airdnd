@@ -1,7 +1,9 @@
 package rice_monkey.booking.exception.infra;
 
+import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
+@Getter
 public abstract class InfrastructureException extends RuntimeException {
 
     private final String errorCode;
