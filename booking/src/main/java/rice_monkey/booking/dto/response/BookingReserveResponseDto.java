@@ -19,13 +19,17 @@ public record BookingReserveResponseDto(
         String wsTopic
 ) {
 
-    private record NextAction(
+    /**
+     * 클라이언트가 실제 결제 페이지로 이동할 고유 URL을 포함합니다.
+     * type 필드는 프론트에서 어떤 행동을 해야 할지(예: REDIRECT_TO_PAYMENT) 구분할 때 씁니다.
+     */
+    public record NextAction(
             String type,
-            String paymentUrl
+            String checkoutUrl
     ) {
     }
 
-    public static BookingReserveResponseDto from(Booking booking) {
+    public static BookingReserveResponseDto from(Booking booking, String checkoutUrl) {
         return new BookingReserveResponseDto(
                 booking.getId(),
                 booking.getListingId(),
@@ -36,8 +40,10 @@ public record BookingReserveResponseDto(
                 booking.getListingTitleSnapshot(),
                 booking.getPaymentAmount(),
                 booking.getCreatedAt(),
-                new NextAction("PAYMENT_REQUIRED",
-                        "payments/" + booking.getId()),
+                new NextAction(
+                        "REDIRECT_TO_PAYMENT",
+                        checkoutUrl
+                ),
                 "booking." + booking.getId()
         );
     }

@@ -1,5 +1,6 @@
 package rice_monkey.booking.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,6 +23,9 @@ import rice_monkey.booking.exception.business.booking.BookingNotFoundException;
 import rice_monkey.booking.exception.business.booking.ListingUnavailableException;
 import rice_monkey.booking.feign.listing.ListingClient;
 import rice_monkey.booking.feign.listing.dto.ListingDto;
+import rice_monkey.booking.feign.payment.PaymentClient;
+import rice_monkey.booking.feign.payment.dto.PaymentCreateRequestDto;
+import rice_monkey.booking.feign.payment.dto.PaymentCreateResponseDto;
 
 import java.time.LocalDate;
 import java.util.Optional;
@@ -42,6 +46,8 @@ class BookingServiceTest {
     private BookingEventRepository bookingEventRepository;
     @Mock
     private ListingClient listingClient;
+    @Mock
+    private PaymentClient paymentClient;
     @Mock
     private RedisLockService redisLockService;
 
@@ -80,31 +86,52 @@ class BookingServiceTest {
     }
 
     @Test
-    @DisplayName("정상적으로 예약 시 Booking 저장 및 BookingRequested 이벤트 발행")
-    void reserve_success_thenSavesBookingAndEmitsEvent() {
+    @DisplayName("정상적으로 예약 시 Booking 저장, 이벤트 발행 및 결제 세션 요청")
+    void reserve_success_andTriggersPaymentSession() {
         // given
-        BookingReserveRequestDto dto = new BookingReserveRequestDto(3L, LocalDate.of(2025, 7, 10), LocalDate.of(2025, 7, 15), 3);
+        BookingReserveRequestDto dto = new BookingReserveRequestDto(
+                3L,
+                LocalDate.of(2025, 7, 10),
+                LocalDate.of(2025, 7, 15),
+                3
+        );
         given(redisLockService.acquire(anyString())).willReturn(true);
         ListingDto listingDto = mock(ListingDto.class);
         given(listingClient.find(dto.listingId())).willReturn(listingDto);
         given(listingDto.status()).willReturn(BookingConstant.LISTING_PUBLISHED);
         given(listingDto.price()).willReturn(150);
         given(listingDto.name()).willReturn("Test Listing");
-        given(listingDto.status()).willReturn(BookingConstant.LISTING_PUBLISHED);
+
         given(bookingRepository.save(any(Booking.class))).willAnswer(invocation -> {
             Booking b = invocation.getArgument(0);
             b.setId(10L);
             return b;
         });
 
+        // 결제 세션 생성 스텁
+        String expectedUrl = "https://checkout.pg.com/session/xyz123";
+        given(paymentClient.createPayment(any(PaymentCreateRequestDto.class)))
+                .willReturn(new PaymentCreateResponseDto(20L, expectedUrl));
+
         // when
         BookingReserveResponseDto response = bookingService.reserve(dto, 300L);
 
         // then
-        assertThat(response.id()).isEqualTo(10L);
-        assertThat(response.listingId()).isEqualTo(3L);
+        // 1) 예약 저장 및 이벤트 발행
         verify(bookingRepository).save(any(Booking.class));
         verify(bookingEventRepository).save(any(BookingEvent.class));
+
+        // 2) PaymentClient 호출
+        verify(paymentClient).createPayment(argThat(req ->
+                req.bookingId() == 10L &&
+                        req.amount() == 150 &&
+                        req.callbackUrl().equals("https://api.my-domain.com/api/payments/webhook")
+        ));
+
+        // 3) 응답 내 nextAction.checkoutUrl 값 검증
+        assertThat(response.nextAction().checkoutUrl()).isEqualTo(expectedUrl);
+
+        // 4) 락 해제
         verify(redisLockService).release(anyString());
     }
 

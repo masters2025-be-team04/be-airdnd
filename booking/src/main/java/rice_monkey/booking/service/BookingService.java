@@ -21,6 +21,9 @@ import rice_monkey.booking.exception.business.booking.ListingUnavailableExceptio
 import rice_monkey.booking.exception.infra.JsonSerializationException;
 import rice_monkey.booking.feign.listing.ListingClient;
 import rice_monkey.booking.feign.listing.dto.ListingDto;
+import rice_monkey.booking.feign.payment.PaymentClient;
+import rice_monkey.booking.feign.payment.dto.PaymentCreateRequestDto;
+import rice_monkey.booking.feign.payment.dto.PaymentCreateResponseDto;
 
 import java.time.temporal.ChronoUnit;
 
@@ -31,6 +34,7 @@ public class BookingService {
     private final BookingRepository bookingRepository;
     private final BookingEventRepository bookingEventRepository;
     private final ListingClient listingClient;
+    private final PaymentClient paymentClient;
     private final RedisLockService redisLockService;
 
     @Transactional
@@ -61,7 +65,16 @@ public class BookingService {
             BookingEvent bookingEvent = safeCreateBookingEvent(booking, BookingConstant.BOOKING_REQUESTED);
             bookingEventRepository.save(bookingEvent);
 
-            return BookingReserveResponseDto.from(booking);
+            // 결제 세션 생성
+            String callbackUrl = "https://api.my-domain.com/api/payments/webhook";
+            PaymentCreateRequestDto payReq = new PaymentCreateRequestDto(
+                    booking.getId(),
+                    booking.getPaymentAmount(),
+                    callbackUrl
+            );
+            PaymentCreateResponseDto payRes = paymentClient.createPayment(payReq);
+
+            return BookingReserveResponseDto.from(booking, payRes.checkoutUrl());
         } finally {
             redisLockService.release(key);
         }
