@@ -14,10 +14,11 @@ import rice_monkey.booking.domain.BookingState;
 import rice_monkey.booking.dto.request.BookingReserveRequestDto;
 import rice_monkey.booking.dto.response.BookingReserveResponseDto;
 import rice_monkey.booking.dto.response.BookingResponseDto;
-import rice_monkey.booking.exception.business.booking.BookingNotFoundException;
-import rice_monkey.booking.exception.business.booking.ListingUnavailableException;
 import rice_monkey.booking.exception.business.Authorization.UnauthorizedBookingAccessException;
 import rice_monkey.booking.exception.business.booking.AlreadyBookedException;
+import rice_monkey.booking.exception.business.booking.BookingNotFoundException;
+import rice_monkey.booking.exception.business.booking.ListingUnavailableException;
+import rice_monkey.booking.exception.infra.JsonSerializationException;
 import rice_monkey.booking.feign.ListingClient;
 import rice_monkey.booking.feign.dto.ListingDto;
 
@@ -26,13 +27,14 @@ import java.time.temporal.ChronoUnit;
 @Service
 @RequiredArgsConstructor
 public class BookingService {
+
     private final BookingRepository bookingRepository;
     private final BookingEventRepository bookingEventRepository;
     private final ListingClient listingClient;
     private final RedisLockService redisLockService;
 
     @Transactional
-    public BookingReserveResponseDto reserve(BookingReserveRequestDto dto, Long guestId) throws JsonProcessingException {
+    public BookingReserveResponseDto reserve(BookingReserveRequestDto dto, Long guestId) {
         String key = RedisConstant.LOCK_LISTING + dto.listingId();
         if (!redisLockService.acquire(key)) {
             throw new AlreadyBookedException(dto.listingId());
@@ -55,7 +57,9 @@ public class BookingService {
                     .listingTitleSnapshot(listing.name())
                     .build();
             bookingRepository.save(booking);
-            bookingEventRepository.save(BookingEvent.of(BookingConstant.BOOKING_REQUESTED, booking));
+
+            BookingEvent bookingEvent = safeCreateBookingEvent(booking, BookingConstant.BOOKING_REQUESTED);
+            bookingEventRepository.save(bookingEvent);
 
             return BookingReserveResponseDto.from(booking);
         } finally {
@@ -75,7 +79,7 @@ public class BookingService {
     }
 
     @Transactional
-    public void cancelBooking(long id, long userId) throws JsonProcessingException {
+    public void cancelBooking(long id, long userId) {
         Booking booking = bookingRepository.findById(id)
                 .orElseThrow(() -> new BookingNotFoundException(id));
 
@@ -84,17 +88,30 @@ public class BookingService {
         }
 
         booking.setStatus(BookingState.CANCELED);
-        bookingEventRepository.save(BookingEvent.of(BookingConstant.BOOKING_CANCELED, booking));
+
+        BookingEvent bookingEvent = safeCreateBookingEvent(booking, BookingConstant.BOOKING_CANCELED);
+        bookingEventRepository.save(bookingEvent);
+
         bookingRepository.delete(booking);
     }
 
     @Transactional
-    public void confirm(Long id) throws JsonProcessingException {
+    public void confirm(Long id) {
         Booking booking = bookingRepository.findById(id)
                 .orElseThrow(() -> new BookingNotFoundException(id));
 
         booking.setStatus(BookingState.CONFIRMED);
-        bookingEventRepository.save(BookingEvent.of(BookingConstant.BOOKING_CONFIRMED, booking));
+        BookingEvent bookingEvent = safeCreateBookingEvent(booking, BookingConstant.BOOKING_CONFIRMED);
+
+        bookingEventRepository.save(bookingEvent);
+    }
+
+    private BookingEvent safeCreateBookingEvent(Booking booking, String eventType) {
+        try {
+            return BookingEvent.of(eventType, booking);
+        } catch (JsonProcessingException e) {
+            throw new JsonSerializationException("Error serializing booking event data");
+        }
     }
 
 }
