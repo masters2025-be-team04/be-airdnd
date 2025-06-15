@@ -1,4 +1,4 @@
-package rice_monkey.booking.feign.dto;
+package rice_monkey.booking.feign.listing.dto;
 
 public record ListingDto(
         Long id,

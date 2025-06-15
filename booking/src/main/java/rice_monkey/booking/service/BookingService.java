@@ -19,8 +19,8 @@ import rice_monkey.booking.exception.business.booking.AlreadyBookedException;
 import rice_monkey.booking.exception.business.booking.BookingNotFoundException;
 import rice_monkey.booking.exception.business.booking.ListingUnavailableException;
 import rice_monkey.booking.exception.infra.JsonSerializationException;
-import rice_monkey.booking.feign.ListingClient;
-import rice_monkey.booking.feign.dto.ListingDto;
+import rice_monkey.booking.feign.listing.ListingClient;
+import rice_monkey.booking.feign.listing.dto.ListingDto;
 
 import java.time.temporal.ChronoUnit;
 
