@@ -1,4 +1,4 @@
-package rice_monkey.booking.exception;
+package rice_monkey.booking.exception.business;
 
 import lombok.Getter;
 import org.springframework.http.HttpStatus;

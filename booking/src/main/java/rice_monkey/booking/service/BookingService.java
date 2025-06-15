@@ -14,10 +14,10 @@ import rice_monkey.booking.domain.BookingState;
 import rice_monkey.booking.dto.request.BookingReserveRequestDto;
 import rice_monkey.booking.dto.response.BookingReserveResponseDto;
 import rice_monkey.booking.dto.response.BookingResponseDto;
-import rice_monkey.booking.exception.booking.BookingNotFoundException;
-import rice_monkey.booking.exception.booking.ListingUnavailableException;
-import rice_monkey.booking.exception.Authorization.UnauthorizedBookingAccessException;
-import rice_monkey.booking.exception.booking.AlreadyBookedException;
+import rice_monkey.booking.exception.business.booking.BookingNotFoundException;
+import rice_monkey.booking.exception.business.booking.ListingUnavailableException;
+import rice_monkey.booking.exception.business.Authorization.UnauthorizedBookingAccessException;
+import rice_monkey.booking.exception.business.booking.AlreadyBookedException;
 import rice_monkey.booking.feign.ListingClient;
 import rice_monkey.booking.feign.dto.ListingDto;
 

@@ -7,7 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import rice_monkey.booking.common.advice.dto.ProblemDetail;
-import rice_monkey.booking.exception.BusinessException;
+import rice_monkey.booking.exception.business.BusinessException;
 
 @RestControllerAdvice
 @Slf4j

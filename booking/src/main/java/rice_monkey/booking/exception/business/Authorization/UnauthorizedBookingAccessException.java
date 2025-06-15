@@ -1,8 +1,8 @@
-package rice_monkey.booking.exception.Authorization;
+package rice_monkey.booking.exception.business.Authorization;
 
 
 import org.springframework.http.HttpStatus;
-import rice_monkey.booking.exception.BusinessException;
+import rice_monkey.booking.exception.business.BusinessException;
 
 public class UnauthorizedBookingAccessException extends BusinessException {
     public UnauthorizedBookingAccessException(Long bookingId, Long userId) {
