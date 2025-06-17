@@ -1,6 +1,7 @@
 package rice_monkey.member.domain;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,6 +13,7 @@ import rice_monkey.member.Oauth.OauthProvider;
 }) //동시성 상황에서 유니크 제약 조건 추가 컬럼 이름 좀더 고민해보자
 @Getter
 @NoArgsConstructor
+@AllArgsConstructor
 @Builder
 public class Member {
 
