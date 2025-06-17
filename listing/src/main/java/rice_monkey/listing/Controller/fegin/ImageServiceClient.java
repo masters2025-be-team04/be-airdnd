@@ -1,4 +1,4 @@
-package rice_monkey.member.fegin;
+package rice_monkey.listing.Controller.fegin;
 
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
@@ -18,6 +18,7 @@ public interface ImageServiceClient {
             Long imageId,
             String url
     ) {}
+
 
     @GetMapping(value = "/images/{id}")
     ImageResponse getImageById(@PathVariable("id") Long id);

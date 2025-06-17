@@ -25,7 +25,7 @@ public class Listing {
     private LocalDateTime startDate;
     private LocalDateTime endDate;
 
-    private String imgUrl;
+    private Long imgId;
     private Long hostId;
 
     private StayType type;

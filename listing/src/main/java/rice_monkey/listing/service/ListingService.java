@@ -3,6 +3,7 @@ package rice_monkey.listing.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import rice_monkey.listing.Controller.fegin.ImageServiceClient;
 import rice_monkey.listing.Repository.ListingRepository;
 import rice_monkey.listing.Repository.ListingCommentRepository;
 import rice_monkey.listing.Repository.TagRepository;
@@ -23,9 +24,16 @@ public class ListingService {
     private final ListingRepository listingRepository;
     private final ListingCommentRepository listingCommentRepository;
     private final TagRepository tagRepository;
+    private final ImageServiceClient imageServiceClient;
 
     @Transactional
     public Long registerListing(ListingCreateRequest request) {
+
+        Long imageId = 0L;
+        if(request.getImage() != null || !request.getImage().isEmpty()){
+            imageId = imageServiceClient.uploadImage(request.getImage()).imageId();
+        }
+
         List<Tag> tags = tagRepository.findAllById(request.getTagIds());
 
         Listing listing = Listing.builder()
@@ -34,7 +42,7 @@ public class ListingService {
                 .startDate(request.getStartDate())
                 .endDate(request.getEndDate())
                 .status(ListingStatus.valueOf(request.getStatus()))
-                .imgUrl(request.getImgUrl())
+                .imgId(imageId)
                 .hostId(request.getHostId())
                 .type(StayType.valueOf(request.getType()))
                 .maxGuests(request.getMaxGuests())
@@ -57,7 +65,7 @@ public class ListingService {
         Listing listing = listingRepository.findById(id)
                 .orElseThrow(() -> new ListingNotFoundException("숙소를 찾을 수 없습니다."));
 
-        return ListingDetailResponse.from(listing);
+        return ListingDetailResponse.from(listing,getImageUrl(listing));
     }
 
     @Transactional(readOnly = true)
@@ -68,10 +76,15 @@ public class ListingService {
             Double avgRating = getAvgRating(listing);
             Integer listingCommentCountingNumber = getListingCommentNumber(listing);
             List<TagResponse> tagResponses = switchToTagResponse(listing);
-            ListingListQueryResponse switchingResponse = ListingListQueryResponse.switching(listing, avgRating, listingCommentCountingNumber, tagResponses);
+            String imageUrl = getImageUrl(listing);
+            ListingListQueryResponse switchingResponse = ListingListQueryResponse.switching(listing,imageUrl, avgRating, listingCommentCountingNumber, tagResponses);
             responses.add(switchingResponse);
         }
         return responses;
+    }
+
+    private String getImageUrl(Listing listing) {
+        return imageServiceClient.getImageById(listing.getId()).url();
     }
 
 

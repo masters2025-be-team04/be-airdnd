@@ -7,7 +7,8 @@ import rice_monkey.listing.domain.Listing;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Getter @Builder
+@Getter
+@Builder
 public class ListingDetailResponse {
 
     private Long id;
@@ -27,29 +28,7 @@ public class ListingDetailResponse {
     private List<TagDto> tags;
     private List<ListingCommentDto> comments;
 
-    @Getter @Builder
-    public static class AddressDto {
-        private String fullAddress;
-        private Double latitude;
-        private Double longitude;
-    }
-
-    @Getter @Builder
-    public static class TagDto {
-        private String name;
-        private String description;
-    }
-
-    @Getter @Builder
-    public static class ListingCommentDto {
-        private Long id;
-        private String writer;
-        private String content;
-        private LocalDateTime createdAt;
-        private Double rating;
-    }
-
-    public static ListingDetailResponse from(Listing listing) {
+    public static ListingDetailResponse from(Listing listing, String imageUrl) {
         return ListingDetailResponse.builder()
                 .id(listing.getId())
                 .name(listing.getName())
@@ -59,7 +38,7 @@ public class ListingDetailResponse {
                 .startDate(listing.getStartDate())
                 .endDate(listing.getEndDate())
                 .status(String.valueOf(listing.getStatus()))
-                .imgUrl(listing.getImgUrl())
+                .imgUrl(imageUrl)
                 .hostId(listing.getHostId())
                 .address(AddressDto.builder()
                         .fullAddress(listing.getAddress().getFullAddress())
@@ -83,5 +62,28 @@ public class ListingDetailResponse {
                         .toList())
                 .build();
     }
+
+    @Getter @Builder
+    public static class AddressDto {
+        private String fullAddress;
+        private Double latitude;
+        private Double longitude;
+    }
+
+    @Getter @Builder
+    public static class TagDto {
+        private String name;
+        private String description;
+    }
+
+    @Getter @Builder
+    public static class ListingCommentDto {
+        private Long id;
+        private String writer;
+        private String content;
+        private LocalDateTime createdAt;
+        private Double rating;
+    }
 }
+
 
