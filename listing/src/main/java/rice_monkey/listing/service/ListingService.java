@@ -3,7 +3,7 @@ package rice_monkey.listing.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import rice_monkey.listing.Controller.fegin.ImageServiceClient;
+import rice_monkey.listing.fegin.ImageServiceClient;
 import rice_monkey.listing.Repository.ListingRepository;
 import rice_monkey.listing.Repository.ListingCommentRepository;
 import rice_monkey.listing.Repository.TagRepository;

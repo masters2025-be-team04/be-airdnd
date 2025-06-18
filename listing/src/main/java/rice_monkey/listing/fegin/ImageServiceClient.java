@@ -1,4 +1,4 @@
-package rice_monkey.listing.Controller.fegin;
+package rice_monkey.listing.fegin;
 
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;

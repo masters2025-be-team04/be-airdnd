@@ -1,11 +1,12 @@
-package rice_monkey.controller;
+package rice_monkey.messaging.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.stereotype.Controller;
-import rice_monkey.dto.ChatMessageDto;
-import rice_monkey.service.ChatService;
+import rice_monkey.messaging.dto.ChatMessageDto;
+import rice_monkey.messaging.service.ChatMongoService;
+import rice_monkey.messaging.service.ChatService;
 
 @RequiredArgsConstructor
 @Controller

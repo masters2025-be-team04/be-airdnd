@@ -1,8 +1,10 @@
-package rice_monkey.dto;
+package rice_monkey.messaging.dto;
 
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.util.List;
 
 @Getter
 @Setter

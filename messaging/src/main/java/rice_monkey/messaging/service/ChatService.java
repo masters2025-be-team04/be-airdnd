@@ -1,13 +1,14 @@
-package rice_monkey.service;
+package rice_monkey.messaging.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import rice_monkey.dto.ChatMessageDto;
-import rice_monkey.dto.ChatRoomListGetResponse;
-import rice_monkey.dto.MessageSubDto;
+import rice_monkey.messaging.dto.ChatMessageDto;
+import rice_monkey.messaging.dto.ChatRoomListGetResponse;
+import rice_monkey.messaging.dto.MessageSubDto;
+import rice_monkey.messaging.dto.MessageType;
 import rice_monkey.messaging.redis.RedisPublisher;
-import rice_monkey.repository.ChatRoomRedisRepository;
+import rice_monkey.messaging.repository.ChatRoomRedisRepository;
 
 import java.util.List;
 
@@ -67,5 +68,39 @@ public class ChatService {
 
         redisPublisher.publish(messageSubDto);
     }
+
+    private Long getPartnerId(ChatMessageDto chatMessage, ChatRoomListGetResponse chatRoomInfo) {
+        Long userId = chatMessage.getUserId();
+        Long partnerId = chatRoomInfo.getPartnerId();
+
+        if (partnerId == null || partnerId.equals(userId)) {
+            throw new IllegalStateException("잘못된 파트너 ID입니다.");
+        }
+        return partnerId;
+    }
+
+    private void setNewChatRoomInfo(ChatMessageDto chatMessage, ChatRoomListGetResponse chatRoomInfo) {
+        Long userId = chatMessage.getUserId();
+        Long roomId = chatMessage.getRoomId();
+
+        // 마지막 메시지 업데이트
+        chatRoomInfo.setLastMessage(chatMessage.getMessage());
+        // sentTime은 문자열로 들어있을 수 있으니 적절히 파싱 또는 현재 시각을 사용
+        chatRoomInfo.setLastMessageTime(java.time.LocalDateTime.now());
+
+        // 나의 Redis에 저장
+        chatRoomRedisRepository.saveChatRoom(userId, roomId, chatRoomInfo);
+
+        // 상대방도 동일하게 저장
+        Long partnerId = getPartnerId(chatMessage, chatRoomInfo);
+        chatRoomRedisRepository.saveChatRoom(partnerId, roomId, chatRoomInfo);
+    }
+
+    private List<ChatRoomListGetResponse> getChatRoomListByUserId(Long userId) {
+        return chatRoomRedisRepository.getChatRoomList(userId);
+    }
+
+
+
 
 }
