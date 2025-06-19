@@ -3,7 +3,7 @@ package rice_monkey.member.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import rice_monkey.member.Oauth.OauthProvider;
+import rice_monkey.member.oauth.OauthProvider;
 import rice_monkey.member.domain.Member;
 import rice_monkey.member.domain.MemberRole;
 import rice_monkey.member.dto.SignupRequest;

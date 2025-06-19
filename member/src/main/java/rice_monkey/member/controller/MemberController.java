@@ -1,4 +1,4 @@
-package rice_monkey.member.Controller;
+package rice_monkey.member.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;

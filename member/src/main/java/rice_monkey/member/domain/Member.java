@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import rice_monkey.member.Oauth.OauthProvider;
+import rice_monkey.member.oauth.OauthProvider;
 
 @Entity
 @Table(name = "member", uniqueConstraints = {

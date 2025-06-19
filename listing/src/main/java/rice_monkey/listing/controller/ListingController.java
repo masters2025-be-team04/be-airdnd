@@ -1,9 +1,8 @@
-package rice_monkey.listing.Controller;
+package rice_monkey.listing.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import rice_monkey.listing.domain.Listing;
 import rice_monkey.listing.dto.*;
 import rice_monkey.listing.service.ListingService;
 

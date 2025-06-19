@@ -7,13 +7,13 @@ import rice_monkey.member.domain.MemberRole;
 @Getter
 public class SignupRequest {
 
-    String loginId;
+    private String loginId;
 
-    String password;
+    private String password;
 
-    String nickname;
+    private String nickname;
 
-    MemberRole role;
+    private MemberRole role;
 
-    MultipartFile image;
+    private MultipartFile image;
 }

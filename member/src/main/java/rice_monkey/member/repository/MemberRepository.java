@@ -1,7 +1,7 @@
 package rice_monkey.member.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import rice_monkey.member.Oauth.OauthProvider;
+import rice_monkey.member.oauth.OauthProvider;
 import rice_monkey.member.domain.Member;
 
 import java.util.Optional;
