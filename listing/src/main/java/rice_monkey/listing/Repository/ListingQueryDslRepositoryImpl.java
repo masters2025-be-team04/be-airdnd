@@ -2,7 +2,10 @@ package rice_monkey.listing.Repository;
 
 
 import com.querydsl.core.types.dsl.BooleanTemplate;
+import com.querydsl.jpa.impl.JPAQueryFactory;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Repository;
 import rice_monkey.listing.domain.QListing.Listing;
 import rice_monkey.listing.dto.ListingSearchCondition;
@@ -17,44 +20,62 @@ import static com.querydsl.core.types.dsl.Expressions.booleanTemplate;
 @RequiredArgsConstructor
 public class ListingQueryDslRepositoryImpl implements ListingQueryDslRepository {
 
+    @Bean
+    public JPAQueryFactory queryFactory(EntityManager em) {
+        return new JPAQueryFactory(em);
+    }
+
+    private final JPAQueryFactory queryFactory;
+
     @Override
     public List<Listing> getListingsFilteredByCondition(ListingSearchCondition condition) {
-        return List.of();
+
+        QListing listing = QListing.listing;
+        BooleanBuilder builder = new BooleanBuilder();
+
+        addDateCondition(condition, builder, listing);
+        addGuestCountCondition(condition, builder, listing);
+        addPriceCondition(condition, builder, listing);
+        addLocationCondition(condition, builder, listing);
+
+        return queryFactory
+                .selectFrom(listing)
+                .where(builder)
+                .fetch();
     }
 
-    private void addDateCondition(ListingSearchCondition condition, BooleanBuilder builder) {
+    private void addDateCondition(ListingSearchCondition condition, BooleanBuilder builder, QListing listing) {
         if (condition.hasDateCondition()) {
             List<LocalDate> reservationDates = condition.getReservationDates();
-            builder.andNot(Listing.closedStayDates.any().in(reservationDates));
+            builder.andNot(listing.closedStayDates.any().in(reservationDates));
         }
     }
 
-    private void addGuestCountCondition(ListingSearchCondition condition, BooleanBuilder builder) {
+    private void addGuestCountCondition(ListingSearchCondition condition, BooleanBuilder builder, QListing listing) {
         if (condition.hasGuestCountCondition()) {
-            Integer guestCount = condition.getGuestCount();
-            builder.and(Listing.maxGuests.goe(guestCount));
+            builder.and(listing.maxGuests.goe(condition.getGuestCount()));
         }
     }
 
-    private void addPriceCondition(ListingSearchCondition condition, BooleanBuilder builder) {
+    private void addPriceCondition(ListingSearchCondition condition, BooleanBuilder builder, QListing listing) {
         if (condition.hasPriceCondition()) {
-            Integer minPrice = condition.getMinPrice();
-            Integer maxPrice = condition.getMaxPrice();
-            builder.and(Listing.price.goe(minPrice))
-                    .and(Listing.price.loe(maxPrice));
+            builder.and(listing.price.goe(condition.getMinPrice()))
+                    .and(listing.price.loe(condition.getMaxPrice()));
         }
     }
 
-    private void addLocationCondition(ListingSearchCondition condition, BooleanBuilder builder) {
+    private void addLocationCondition(ListingSearchCondition condition, BooleanBuilder builder, QListing listing) {
         if (condition.hasLocationCondition()) {
-            Double latitude = condition.getLatitude();
-            Double longitude = condition.getLongitude();
+            Double lat = condition.getLatitude();
+            Double lng = condition.getLongitude();
             Integer distance = condition.getDistance();
 
-            BooleanTemplate distanceCondition = booleanTemplate(
+            BooleanTemplate distanceCond = booleanTemplate(
                     "ST_Distance_Sphere(point({0}, {1}), point({2}, {3})) < {4}",
-                    longitude, latitude, Listing.location.longitude, Listing.location.latitude, distance);
-            builder.and(distanceCondition);
+                    lng, lat, listing.location.longitude, listing.location.latitude, distance
+            );
+            builder.and(distanceCond);
         }
     }
 }
+

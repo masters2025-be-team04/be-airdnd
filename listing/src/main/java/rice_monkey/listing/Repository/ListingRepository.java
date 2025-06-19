@@ -12,9 +12,10 @@ import java.util.Optional;
 
 public interface ListingRepository extends JpaRepository<Listing, Long> , ListingQueryDslRepository {
 
-    @EntityGraph(attributePaths = {"tags", "comments"})
-
     Optional<Listing> findById(Long id);
+
+    @EntityGraph(attributePaths = {"tags", "comments"})
+    Optional<Listing> findWithTagsAndCommentsById(Long id);
 
     List<Listing> findAllByCondition(ListingSearchCondition condition);
 

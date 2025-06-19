@@ -9,7 +9,7 @@ import rice_monkey.member.oauth.OauthProvider;
 
 @Entity
 @Table(name = "member", uniqueConstraints = {
-        @UniqueConstraint(name = "UK_MEMBER_NAME", columnNames = {"name"})
+        @UniqueConstraint(name = "UK_MEMBER_NAME", columnNames = {"nickname"})
 }) //동시성 상황에서 유니크 제약 조건 추가 컬럼 이름 좀더 고민해보자
 @Getter
 @NoArgsConstructor

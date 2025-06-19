@@ -60,14 +60,14 @@ public class ListingService {
 
     @Transactional
     public Listing findActiveListing(Long listingId) {
-        return listingRepository.findById(listingId)
+        return listingRepository.findWithTagsAndCommentsById(listingId)
                 .filter(listing -> listing.getStatus() == ListingStatus.AVAILABLE)
                 .orElseThrow(() -> new IllegalArgumentException("숙소가 사용 불가능한 상태입니다."));
     }
 
     @Transactional(readOnly = true)
     public ListingDetailResponse getListingDetail(Long id) {
-        Listing listing = listingRepository.findById(id)
+        Listing listing = listingRepository.findWithTagsAndCommentsById(id)
                 .orElseThrow(() -> new ListingNotFoundException("숙소를 찾을 수 없습니다."));
 
         return ListingDetailResponse.from(listing,getImageUrl(listing));
