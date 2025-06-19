@@ -2,14 +2,12 @@ package rice_monkey.booking.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import rice_monkey.booking.common.constants.BookingConstant;
-import rice_monkey.booking.common.constants.RedisConstant;
-import rice_monkey.booking.dao.BookingEventRepository;
 import rice_monkey.booking.dao.BookingRepository;
 import rice_monkey.booking.domain.Booking;
-import rice_monkey.booking.domain.BookingEvent;
 import rice_monkey.booking.domain.BookingState;
 import rice_monkey.booking.dto.request.BookingReserveRequestDto;
 import rice_monkey.booking.dto.response.BookingReserveResponseDto;
@@ -17,15 +15,9 @@ import rice_monkey.booking.dto.response.BookingResponseDto;
 import rice_monkey.booking.exception.business.Authorization.UnauthorizedBookingAccessException;
 import rice_monkey.booking.exception.business.booking.AlreadyBookedException;
 import rice_monkey.booking.exception.business.booking.BookingNotFoundException;
-import rice_monkey.booking.exception.business.booking.ListingUnavailableException;
 import rice_monkey.booking.exception.infra.JsonSerializationException;
 import rice_monkey.booking.feign.listing.ListingClient;
 import rice_monkey.booking.feign.listing.dto.ListingDto;
-import rice_monkey.booking.feign.payment.PaymentClient;
-import rice_monkey.booking.feign.payment.dto.PaymentCreateRequestDto;
-import rice_monkey.booking.feign.payment.dto.PaymentCreateResponseDto;
-
-import java.time.temporal.ChronoUnit;
 
 @Service
 @RequiredArgsConstructor
@@ -34,50 +26,18 @@ public class BookingService {
     private final BookingRepository bookingRepository;
     private final BookingEventRepository bookingEventRepository;
     private final ListingClient listingClient;
-    private final PaymentClient paymentClient;
     private final RedisLockService redisLockService;
 
     @Transactional
     public BookingReserveResponseDto reserve(BookingReserveRequestDto dto, Long guestId) {
-        String key = RedisConstant.LOCK_LISTING + dto.listingId();
-        if (!redisLockService.acquire(key)) {
+        if (bookingRepository.existsOverlap(dto.listingId(), dto.checkin(), dto.checkout()))
             throw new AlreadyBookedException(dto.listingId());
-        }
 
-        try {
-            ListingDto listing = listingClient.find(dto.listingId());
-            if (!listing.status().equals(BookingConstant.LISTING_PUBLISHED)) {
-                throw new ListingUnavailableException(dto.listingId(), listing.status());
-            }
+        ListingDto listing = listingClient.find(dto.listingId());
+        Booking booking = Booking.of(dto, guestId, listing);
+        Booking newBooking = bookingRepository.save(booking);
 
-            Booking booking = Booking.builder()
-                    .listingId(dto.listingId())
-                    .guestId(guestId)
-                    .checkinAt(dto.checkin())
-                    .checkoutAt(dto.checkout())
-                    .stayDays((int) ChronoUnit.DAYS.between(dto.checkin(), dto.checkout()))
-                    .guestCount(dto.guestCount())
-                    .paymentAmount(listing.price())
-                    .listingTitleSnapshot(listing.name())
-                    .build();
-            bookingRepository.save(booking);
-
-            BookingEvent bookingEvent = safeCreateBookingEvent(booking, BookingConstant.BOOKING_REQUESTED);
-            bookingEventRepository.save(bookingEvent);
-
-            // 결제 세션 생성
-            String callbackUrl = "https://api.my-domain.com/api/payments/webhook";
-            PaymentCreateRequestDto payReq = new PaymentCreateRequestDto(
-                    booking.getId(),
-                    booking.getPaymentAmount(),
-                    callbackUrl
-            );
-            PaymentCreateResponseDto payRes = paymentClient.createPayment(payReq);
-
-            return BookingReserveResponseDto.from(booking, payRes.checkoutUrl());
-        } finally {
-            redisLockService.release(key);
-        }
+        return BookingReserveResponseDto.from(newBooking);
     }
 
     @Transactional(readOnly = true)
@@ -85,7 +45,7 @@ public class BookingService {
         Booking booking = bookingRepository.findById(id)
                 .orElseThrow(() -> new BookingNotFoundException(id));
 
-        if (!booking.getGuestId().equals(userId)) {
+        if (booking.getGuestId() != userId) {
             throw new UnauthorizedBookingAccessException(id, userId);
         }
         return BookingResponseDto.from(booking);
@@ -96,7 +56,7 @@ public class BookingService {
         Booking booking = bookingRepository.findById(id)
                 .orElseThrow(() -> new BookingNotFoundException(id));
 
-        if (!booking.getGuestId().equals(userId)) {
+        if (booking.getGuestId() != userId) {
             throw new UnauthorizedBookingAccessException(id, userId);
         }
 

@@ -1,6 +1,5 @@
 package rice_monkey.booking.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -9,10 +8,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import rice_monkey.booking.common.constants.BookingConstant;
 import rice_monkey.booking.common.constants.RedisConstant;
-import rice_monkey.booking.dao.BookingEventRepository;
 import rice_monkey.booking.dao.BookingRepository;
 import rice_monkey.booking.domain.Booking;
-import rice_monkey.booking.domain.BookingEvent;
 import rice_monkey.booking.domain.BookingState;
 import rice_monkey.booking.dto.request.BookingReserveRequestDto;
 import rice_monkey.booking.dto.response.BookingReserveResponseDto;
