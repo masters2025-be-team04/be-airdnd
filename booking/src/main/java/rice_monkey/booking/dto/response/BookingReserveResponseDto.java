@@ -5,16 +5,14 @@ import rice_monkey.booking.domain.Booking;
 public record BookingReserveResponseDto(
         long id,
         String orderId,
-        long amount,
-        String clientKey
+        long amount
 ) {
 
-    public static BookingReserveResponseDto from(Booking booking, String clientKey) {
+    public static BookingReserveResponseDto from(Booking booking) {
         return new BookingReserveResponseDto(
                 booking.getId(),
                 booking.getOrderId(),
-                booking.getPaymentAmount(),
-                clientKey
+                booking.getPaymentAmount()
         );
     }
 
