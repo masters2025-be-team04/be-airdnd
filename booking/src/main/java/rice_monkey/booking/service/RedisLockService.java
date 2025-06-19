@@ -1,26 +1,26 @@
 package rice_monkey.booking.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.redis.core.StringRedisTemplate;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Service;
 
-import java.time.Duration;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 @Service
 @RequiredArgsConstructor
 public class RedisLockService {
 
-    private final StringRedisTemplate redis;
-    private static final Duration TTL = Duration.ofSeconds(30);
+    private final RedissonClient redisson;
+    private static final String KEY_FMT = "lock:booking:%d:%s:%s";
 
-    public boolean acquire(String key) {
-        Boolean result = redis.opsForValue().setIfAbsent(key, "locked", TTL);
-
-        return result != null && result;
-    }
-
-    public void release(String key) {
-        redis.delete(key);
+    public RLock bookingLock(Long listingId, LocalDate in, LocalDate out) {
+        String key = KEY_FMT.formatted(
+                listingId,
+                in.format(DateTimeFormatter.BASIC_ISO_DATE),   // yyyyMMdd
+                out.format(DateTimeFormatter.BASIC_ISO_DATE));
+        return redisson.getLock(key);
     }
 
 }

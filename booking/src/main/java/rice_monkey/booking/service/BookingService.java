@@ -55,7 +55,7 @@ public class BookingService {
                     .guestId(guestId)
                     .checkinAt(dto.checkin())
                     .checkoutAt(dto.checkout())
-                    .nights((int) ChronoUnit.DAYS.between(dto.checkin(), dto.checkout()))
+                    .stayDays((int) ChronoUnit.DAYS.between(dto.checkin(), dto.checkout()))
                     .guestCount(dto.guestCount())
                     .paymentAmount(listing.price())
                     .listingTitleSnapshot(listing.name())
