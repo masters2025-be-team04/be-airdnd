@@ -25,4 +25,9 @@ public class ImageController {
     public ImageResponse getImageById(@PathVariable long id) {
         return imageService.getImage(id);
     }
+
+    @DeleteMapping("/{id}")
+    public void deleteImageById(@PathVariable long id) {
+        imageService.deleteImage(id);
+    }
 }

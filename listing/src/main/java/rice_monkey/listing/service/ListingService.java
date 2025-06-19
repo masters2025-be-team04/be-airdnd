@@ -1,8 +1,10 @@
 package rice_monkey.listing.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import rice_monkey.listing.eventListener.ImageUploadedEvent;
 import rice_monkey.listing.fegin.ImageServiceClient;
 import rice_monkey.listing.Repository.ListingRepository;
 import rice_monkey.listing.Repository.ListingCommentRepository;
@@ -25,13 +27,16 @@ public class ListingService {
     private final ListingCommentRepository listingCommentRepository;
     private final TagRepository tagRepository;
     private final ImageServiceClient imageServiceClient;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public Long registerListing(ListingCreateRequest request) {
-
         Long imageId = 0L;
-        if(request.getImage() != null || !request.getImage().isEmpty()){
+
+        if (request.getImage() != null && !request.getImage().isEmpty()) {
             imageId = imageServiceClient.uploadImage(request.getImage()).imageId();
+            // 이미지 업로드 완료 → 이벤트 발행 (롤백 시 삭제할 준비)
+            eventPublisher.publishEvent(new ImageUploadedEvent(imageId));
         }
 
         List<Tag> tags = tagRepository.findAllById(request.getTagIds());

@@ -21,6 +21,7 @@ public class ImageService {
     private final S3Uploader s3Uploader;
     private final ImageRepository imageRepository;
 
+    @Transactional
     public ImageUploadResponse uploadImage(MultipartFile file) throws IOException {
         String fileUrl = s3Uploader.upload(file);
 
@@ -42,6 +43,11 @@ public class ImageService {
         Image findImage = imageRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("Image not found: " + id));
         return new ImageResponse(findImage.getId(),findImage.getUrl(),findImage.getFileName());
+    }
+
+    @Transactional
+    public void deleteImage(Long id) {
+        imageRepository.deleteById(id);
     }
 }
 
