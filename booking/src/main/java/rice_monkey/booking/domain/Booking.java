@@ -13,7 +13,6 @@ import java.time.temporal.ChronoUnit;
 @Entity
 @Table(name = "booking")
 @Getter
-@Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder
@@ -69,6 +68,10 @@ public class Booking extends BaseEntity {
                 .paymentAmount(listing.price() * stayDays * dto.guestCount())
                 .listingTitleSnapshot(listing.name())
                 .build();
+    }
+
+    public void updateState(BookingState newState) {
+        this.state = newState;
     }
 
 }
