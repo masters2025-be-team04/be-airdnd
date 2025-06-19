@@ -56,8 +56,8 @@ public class Payment {
                 .build();
     }
 
-    public void updateStatus(String status) {
-        this.status = PaymentStatus.valueOf(status.toUpperCase());
+    public void updateStatus(PaymentStatus status) {
+        this.status = status;
     }
 
 }
