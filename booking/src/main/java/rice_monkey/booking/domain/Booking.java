@@ -25,6 +25,9 @@ public class Booking extends BaseEntity {
     @Column(name = "guest_id", nullable = false)
     private long guestId;
 
+    @Column(name = "order_id", nullable = false, unique = true)
+    private String orderId;
+
     @Column(name = "checkin_at", nullable = false, columnDefinition = "DATE")
     private LocalDate checkinAt;
 
@@ -45,7 +48,7 @@ public class Booking extends BaseEntity {
 
     @Builder.Default
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false)
-    private BookingState status = BookingState.REQUESTED;
+    @Column(name = "state", nullable = false)
+    private BookingState state = BookingState.REQUESTED;
 
 }
