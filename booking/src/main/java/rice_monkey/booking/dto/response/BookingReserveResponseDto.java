@@ -9,10 +9,10 @@ public record BookingReserveResponseDto(
         String clientKey
 ) {
 
-    public static BookingReserveResponseDto from(Booking booking, String orderId, String clientKey) {
+    public static BookingReserveResponseDto from(Booking booking, String clientKey) {
         return new BookingReserveResponseDto(
                 booking.getId(),
-                orderId,
+                booking.getOrderId(),
                 booking.getPaymentAmount(),
                 clientKey
         );
