@@ -3,8 +3,12 @@ package rice_monkey.booking.domain;
 import jakarta.persistence.*;
 import lombok.*;
 import rice_monkey.booking.common.entity.BaseEntity;
+import rice_monkey.booking.dto.request.BookingReserveRequestDto;
+import rice_monkey.booking.feign.listing.dto.ListingDto;
+import rice_monkey.booking.util.OrderIdGenerator;
 
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 
 @Entity
 @Table(name = "booking")
@@ -50,5 +54,21 @@ public class Booking extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "state", nullable = false)
     private BookingState state = BookingState.REQUESTED;
+
+    public static Booking of(BookingReserveRequestDto dto, long guestId, ListingDto listing) {
+        int stayDays = (int) ChronoUnit.DAYS.between(dto.checkin(), dto.checkout());
+
+        return Booking.builder()
+                .listingId(dto.listingId())
+                .guestId(guestId)
+                .orderId(OrderIdGenerator.generate(dto.listingId(), guestId))
+                .checkinAt(dto.checkin())
+                .checkoutAt(dto.checkout())
+                .stayDays(stayDays)
+                .guestCount(dto.guestCount())
+                .paymentAmount(listing.price() * stayDays * dto.guestCount())
+                .listingTitleSnapshot(listing.name())
+                .build();
+    }
 
 }
