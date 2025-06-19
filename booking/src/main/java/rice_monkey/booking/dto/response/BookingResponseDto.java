@@ -13,7 +13,7 @@ public record BookingResponseDto(
         LocalDate checkout,
         int guestCount,
         String listingTitleSnapshot,
-        int paymentAmount,
+        long paymentAmount,
         LocalDateTime createdAt
 ) {
 
@@ -21,7 +21,7 @@ public record BookingResponseDto(
         return new BookingResponseDto(
                 booking.getId(),
                 booking.getListingId(),
-                booking.getStatus().name(),
+                booking.getState().name(),
                 booking.getCheckinAt(),
                 booking.getCheckoutAt(),
                 booking.getGuestCount(),
