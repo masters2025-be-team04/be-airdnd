@@ -20,10 +20,10 @@ public class Booking extends BaseEntity {
     private Long id;
 
     @Column(name = "listing_id", nullable = false)
-    private Long listingId;
+    private long listingId;
 
     @Column(name = "guest_id", nullable = false)
-    private Long guestId;
+    private long guestId;
 
     @Column(name = "checkin_at", nullable = false, columnDefinition = "DATE")
     private LocalDate checkinAt;
@@ -31,14 +31,14 @@ public class Booking extends BaseEntity {
     @Column(name = "checkout_at", nullable = false, columnDefinition = "DATE")
     private LocalDate checkoutAt;
 
-    @Column(name = "nights", nullable = false)
-    private Integer nights;
+    @Column(name = "stay_days", nullable = false)
+    private int stayDays;
 
     @Column(name = "guest_count", nullable = false)
-    private Integer guestCount;
+    private int guestCount;
 
     @Column(name = "payment_amount", nullable = false)
-    private Integer paymentAmount;
+    private long paymentAmount;
 
     @Column(name = "listing_title_snapshot", nullable = false)
     private String listingTitleSnapshot;
