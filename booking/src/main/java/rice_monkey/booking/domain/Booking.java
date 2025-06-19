@@ -10,8 +10,8 @@ import java.time.LocalDate;
 @Table(name = "booking")
 @Getter
 @Setter
-@NoArgsConstructor
-@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder
 public class Booking extends BaseEntity {
 
