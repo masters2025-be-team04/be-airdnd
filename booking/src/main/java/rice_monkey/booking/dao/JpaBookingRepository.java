@@ -12,9 +12,9 @@ public interface JpaBookingRepository extends JpaRepository<Booking, Long> {
               SELECT CASE WHEN COUNT(b) > 0 THEN true ELSE false END
               FROM Booking b
               WHERE b.listingId = :listingId
-                AND b.checkinAt  < :checkOut
-                AND b.checkoutAt > :checkIn
-                AND b.state    <> 'CANCELLED'
+                AND b.checkinAt <= :checkOut
+                AND b.checkoutAt >= :checkIn
+                AND b.state <> 'CANCELLED'
             """)
     boolean existsOverlap(long listingId, LocalDate checkIn, LocalDate checkOut);
 
