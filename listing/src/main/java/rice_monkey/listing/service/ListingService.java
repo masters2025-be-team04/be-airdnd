@@ -75,7 +75,7 @@ public class ListingService {
         Listing listing = listingRepository.findWithTagsAndCommentsById(id)
                 .orElseThrow(() -> new ListingNotFoundException("숙소를 찾을 수 없습니다."));
 
-        return ListingDetailResponse.from(listing, getImageUrl(listing));
+        return ListingDetailResponse.from(listing);
     }
 
     @Transactional(readOnly = true)
@@ -86,15 +86,10 @@ public class ListingService {
             Double avgRating = getAvgRating(listing);
             Integer listingCommentCountingNumber = getListingCommentNumber(listing);
             List<TagResponse> tagResponses = switchToTagResponse(listing);
-            String imageUrl = getImageUrl(listing);
-            ListingListQueryResponse switchingResponse = ListingListQueryResponse.switching(listing, imageUrl, avgRating, listingCommentCountingNumber, tagResponses);
+            ListingListQueryResponse switchingResponse = ListingListQueryResponse.switching(listing, avgRating, listingCommentCountingNumber, tagResponses);
             responses.add(switchingResponse);
         }
         return responses;
-    }
-
-    private String getImageUrl(Listing listing) {
-        return imageServiceClient.getImageById(listing.getId()).url();
     }
 
 

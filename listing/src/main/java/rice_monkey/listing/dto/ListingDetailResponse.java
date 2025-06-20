@@ -28,7 +28,7 @@ public class ListingDetailResponse {
     private List<TagDto> tags;
     private List<ListingCommentDto> comments;
 
-    public static ListingDetailResponse from(Listing listing, String imageUrl) {
+    public static ListingDetailResponse from(Listing listing) {
         return ListingDetailResponse.builder()
                 .id(listing.getId())
                 .name(listing.getName())
@@ -38,7 +38,7 @@ public class ListingDetailResponse {
                 .startDate(listing.getStartDate())
                 .endDate(listing.getEndDate())
                 .status(String.valueOf(listing.getStatus()))
-                .imgUrl(imageUrl)
+                .imgUrl(listing.getImgUrl())
                 .hostId(listing.getHostId())
                 .address(AddressDto.builder()
                         .fullAddress(listing.getAddress().getFullAddress())
