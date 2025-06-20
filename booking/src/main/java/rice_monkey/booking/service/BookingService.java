@@ -12,7 +12,6 @@ import rice_monkey.booking.dto.response.BookingResponseDto;
 import rice_monkey.booking.exception.business.Authorization.UnauthorizedBookingAccessException;
 import rice_monkey.booking.exception.business.booking.AlreadyBookedException;
 import rice_monkey.booking.exception.business.booking.BookingNotFoundException;
-import rice_monkey.booking.feign.listing.ListingClient;
 import rice_monkey.booking.feign.listing.dto.ListingDto;
 
 @Service
@@ -20,15 +19,13 @@ import rice_monkey.booking.feign.listing.dto.ListingDto;
 public class BookingService {
 
     private final BookingRepository bookingRepository;
-    private final ListingClient listingClient;
 
     @Transactional
-    public BookingReserveResponseDto reserve(BookingReserveRequestDto dto, Long guestId) {
+    public BookingReserveResponseDto reserve(BookingReserveRequestDto dto, ListingDto listingDto, Long guestId) {
         if (bookingRepository.existsOverlap(dto.listingId(), dto.checkin(), dto.checkout()))
             throw new AlreadyBookedException(dto.listingId());
 
-        ListingDto listing = listingClient.find(dto.listingId());
-        Booking booking = Booking.of(dto, guestId, listing);
+        Booking booking = Booking.of(dto, guestId, listingDto);
         Booking newBooking = bookingRepository.save(booking);
 
         return BookingReserveResponseDto.from(newBooking);
