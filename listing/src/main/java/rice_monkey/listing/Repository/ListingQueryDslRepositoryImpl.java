@@ -1,15 +1,14 @@
 package rice_monkey.listing.Repository;
 
 
+import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.dsl.BooleanTemplate;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Repository;
-import rice_monkey.listing.domain.QListing.Listing;
+import rice_monkey.listing.domain.Listing;
+import rice_monkey.listing.domain.QListing;
 import rice_monkey.listing.dto.ListingSearchCondition;
-import com.querydsl.core.BooleanBuilder;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -67,7 +66,7 @@ public class ListingQueryDslRepositoryImpl implements ListingQueryDslRepository 
 
             BooleanTemplate distanceCond = booleanTemplate(
                     "ST_Distance_Sphere(point({0}, {1}), point({2}, {3})) < {4}",
-                    lng, lat, listing.location.longitude, listing.location.latitude, distance
+                    lng, lat, listing.address.longitude, listing.address.latitude, distance
             );
             builder.and(distanceCond);
         }

@@ -28,11 +28,16 @@ public class Listing {
     private Long imgId;
     private Long hostId;
 
+    private String imgUrl;
+
     private StayType type;
     private Integer maxGuests;
 
     private Address address;
     private ListingStatus status;
+
+    @OneToMany(mappedBy = "listing", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ClosedStayDate> closedStayDates = new ArrayList<>();
 
     @OneToMany(mappedBy = "listing", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ListingComment> comments = new ArrayList<>();

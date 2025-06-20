@@ -48,4 +48,7 @@ public class Member {
 
     @Column(name = "isDeleted")
     private Boolean isDeleted;
+
+    @Column(name = "img_url")
+    private String imgUrl;
 }

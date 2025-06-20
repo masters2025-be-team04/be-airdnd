@@ -1,5 +1,7 @@
 package rice_monkey.listing.domain;
 
+import rice_monkey.listing.exception.NotFoundException;
+
 import java.util.Arrays;
 
 public enum StayType {
