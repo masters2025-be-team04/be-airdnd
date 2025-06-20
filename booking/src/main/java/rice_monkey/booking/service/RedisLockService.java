@@ -61,10 +61,10 @@ public class RedisLockService {
             );
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new RedisBusyException("락 대기 중 인터럽트 발생");
+            throw new RedisBusyException("예약 처리 대기 중 쓰레드가 중단되었습니다. 다시 시도해 주세요.");
         }
         if (!acquired) {
-            throw new RedisBusyException("잠시 후 다시 시도해 주세요.");
+            throw new RedisBusyException("다른 사용자가 예약 중입니다. 잠시 후 다시 시도해 주세요.");
         }
 
         try {
