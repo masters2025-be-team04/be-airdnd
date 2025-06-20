@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import rice_monkey.listing.Repository.TagRepository;
 import rice_monkey.listing.domain.Tag;
+import rice_monkey.listing.exception.NotFoundException;
 
 @Service
 @RequiredArgsConstructor

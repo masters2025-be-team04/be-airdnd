@@ -30,6 +30,6 @@ public class Image {
 
     private LocalDateTime createdAt;
 
-    private String status; // ex: ACTIVE, DELETED
+    private Boolean isDeleted; // ex: ACTIVE, DELETED
 }
 

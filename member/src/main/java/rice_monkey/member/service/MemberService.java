@@ -25,9 +25,12 @@ public class MemberService {
             throw new DuplicateMemberException("이미 존재하는 로그인 ID입니다.");
         }
 
-        Long imageId = null;
+        Long imageId = 0L;
+        String imageUrl = "";
         if(request.getImage() != null || !request.getImage().isEmpty()){
-            imageId = imageServiceClient.uploadImage(request.getImage()).imageId();
+            ImageServiceClient.ImageUploadResponse imageUploadResponse = imageServiceClient.uploadImage(request.getImage());
+            imageId=imageUploadResponse.imageId();
+            imageUrl=imageUploadResponse.url();
         }
 
         String salt = PasswordEncoderUtil.generateSalt();
@@ -42,7 +45,8 @@ public class MemberService {
                 .oauthProvider(OauthProvider.LOCAL)
                 .oauthId("local_" + request.getLoginId())
                 .imgId(imageId)
-                .status(true)
+                .imgUrl(imageUrl)
+                .isDeleted(false)
                 .build();
 
         memberRepository.save(member);

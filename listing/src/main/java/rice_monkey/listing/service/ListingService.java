@@ -32,9 +32,13 @@ public class ListingService {
     @Transactional
     public Long registerListing(ListingCreateRequest request) {
         Long imageId = 0L;
+        String imageUrl = "";
 
         if (request.getImage() != null && !request.getImage().isEmpty()) {
-            imageId = imageServiceClient.uploadImage(request.getImage()).imageId();
+            ImageServiceClient.ImageUploadResponse imageUploadResponse = imageServiceClient.uploadImage(request.getImage());
+            imageId=imageUploadResponse.imageId();
+            imageUrl = imageUploadResponse.url();
+
             // 이미지 업로드 완료 → 이벤트 발행 (롤백 시 삭제할 준비)
             eventPublisher.publishEvent(new ImageUploadedEvent(imageId));
         }
@@ -48,6 +52,7 @@ public class ListingService {
                 .endDate(request.getEndDate())
                 .status(ListingStatus.valueOf(request.getStatus()))
                 .imgId(imageId)
+                .imgUrl(imageUrl)
                 .hostId(request.getHostId())
                 .type(StayType.valueOf(request.getType()))
                 .maxGuests(request.getMaxGuests())

@@ -31,6 +31,7 @@ public class ImageService {
                 .contentType(file.getContentType())
                 .size(file.getSize())
                 .createdAt(LocalDateTime.now())
+                .isDeleted(false)
                 .build();
 
         imageRepository.save(image);
