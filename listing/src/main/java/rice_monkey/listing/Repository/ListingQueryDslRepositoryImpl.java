@@ -20,11 +20,6 @@ import static com.querydsl.core.types.dsl.Expressions.booleanTemplate;
 @RequiredArgsConstructor
 public class ListingQueryDslRepositoryImpl implements ListingQueryDslRepository {
 
-    @Bean
-    public JPAQueryFactory queryFactory(EntityManager em) {
-        return new JPAQueryFactory(em);
-    }
-
     private final JPAQueryFactory queryFactory;
 
     @Override

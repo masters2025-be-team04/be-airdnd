@@ -46,6 +46,6 @@ public class Member {
     @Column(name = "img_id")
     private Long imgId;
 
-    @Column(name = "status")
-    private Boolean status;
+    @Column(name = "isDeleted")
+    private Boolean isDeleted;
 }

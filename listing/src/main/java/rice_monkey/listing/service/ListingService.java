@@ -70,19 +70,19 @@ public class ListingService {
         Listing listing = listingRepository.findWithTagsAndCommentsById(id)
                 .orElseThrow(() -> new ListingNotFoundException("숙소를 찾을 수 없습니다."));
 
-        return ListingDetailResponse.from(listing,getImageUrl(listing));
+        return ListingDetailResponse.from(listing, getImageUrl(listing));
     }
 
     @Transactional(readOnly = true)
-    public List<ListingListQueryResponse> getListingListWithQuery(ListingSearchCondition condition){
-        List<Listing> listings = listingRepository.findAllByCondition(condition);
+    public List<ListingListQueryResponse> getListingListWithQuery(ListingSearchCondition condition) {
+        List<Listing> listings = listingRepository.getListingsFilteredByCondition(condition);
         List<ListingListQueryResponse> responses = new ArrayList<>();
         for (Listing listing : listings) {
             Double avgRating = getAvgRating(listing);
             Integer listingCommentCountingNumber = getListingCommentNumber(listing);
             List<TagResponse> tagResponses = switchToTagResponse(listing);
             String imageUrl = getImageUrl(listing);
-            ListingListQueryResponse switchingResponse = ListingListQueryResponse.switching(listing,imageUrl, avgRating, listingCommentCountingNumber, tagResponses);
+            ListingListQueryResponse switchingResponse = ListingListQueryResponse.switching(listing, imageUrl, avgRating, listingCommentCountingNumber, tagResponses);
             responses.add(switchingResponse);
         }
         return responses;
@@ -105,11 +105,11 @@ public class ListingService {
 
 
     private Double getAvgRating(Listing listing) {
-        return listingCommentRepository.findCommentRatingAvg(listing.getId(),CommentStatus.ACTIVE);
+        return listingCommentRepository.findCommentRatingAvg(listing.getId(), CommentStatus.ACTIVE);
     }
 
     private Integer getListingCommentNumber(Listing listing) {
-        return listingCommentRepository.countByListingIdAndStatus(listing.getId(),CommentStatus.ACTIVE);
+        return listingCommentRepository.countByListingIdAndStatus(listing.getId(), CommentStatus.ACTIVE);
     }
 
     private List<TagResponse> switchToTagResponse(Listing listing) {
@@ -117,7 +117,6 @@ public class ListingService {
                 .map(TagResponse::fromTag)
                 .toList();
     }
-
 
 
     private int calculateAvgPrice(List<Integer> prices) {

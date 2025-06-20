@@ -17,7 +17,7 @@ public interface ListingRepository extends JpaRepository<Listing, Long> , Listin
     @EntityGraph(attributePaths = {"tags", "comments"})
     Optional<Listing> findWithTagsAndCommentsById(Long id);
 
-    List<Listing> findAllByCondition(ListingSearchCondition condition);
+    List<Listing> getListingsFilteredByCondition(ListingSearchCondition condition);
 
     Optional<Listing> findByIdAndStatus(Long id, ListingStatus status);
 
