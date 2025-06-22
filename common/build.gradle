@@ -1,6 +1,5 @@
 plugins {
-	id 'java'
-	id 'org.springframework.boot' version '3.5.0'
+	id 'java-library'
 	id 'io.spring.dependency-management' version '1.1.7'
 }
 
@@ -28,12 +27,19 @@ ext {
 }
 
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter-validation'
-	implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
-	compileOnly 'org.projectlombok:lombok'
+	// 공통 로직에 필요한 스프링 코어
+	implementation 'org.springframework:spring-context'
+	implementation 'org.springframework:spring-aop'
+
+	// OpenFeign (FeignClient 인터페이스)
+	implementation 'org.springframework.cloud:spring-cloud-starter-openfeign:4.3.0'
+
+	// DTO 검증용
+	implementation 'org.springframework.boot:spring-boot-starter-validation:3.5.0'
+
+	// lombok
+	compileOnly 'org.projectlombok:lombok:1.18.38'
 	annotationProcessor 'org.projectlombok:lombok'
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
 dependencyManagement {
