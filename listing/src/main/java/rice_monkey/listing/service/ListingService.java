@@ -91,16 +91,19 @@ public class ListingService {
         }
         return responses;
     }
-
-
-    @Transactional(readOnly = true)
+    @Tra
     public ListingPricesMetaData getListingPricesMetaData() {
-        List<Integer> allPrices = listingRepository.findAllPrices();
+        List<Integer> allPrices = getAllPricesOnly();
         Map<Integer, Long> countPerPrice = getCountPerPrice(allPrices);
         int avgPrice = calculateAvgPrice(allPrices);
         int maxPrice = calculateMaxPrice(allPrices);
         int minPrice = calculateMinPrice(allPrices);
         return new ListingPricesMetaData(countPerPrice, avgPrice, maxPrice, minPrice);
+    }
+
+    @Transactional(readOnly = true)
+    protected List<Integer> getAllPricesOnly() {
+        return listingRepository.findAllPrices();
     }
 
 
