@@ -5,11 +5,13 @@ import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
+
+import java.util.stream.Collectors;
 
 @Component
 public class UserIdHeaderFilter implements GlobalFilter, Ordered {
@@ -24,29 +26,29 @@ public class UserIdHeaderFilter implements GlobalFilter, Ordered {
      */
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
-        // 1) exchange → userId → mutatedExchange 흐름을 Mono<ServerWebExchange>로 구성
-        Mono<ServerWebExchange> exchangeMono = exchange.getPrincipal()
-                // 인증된 Principal(JwtAuthenticationToken)으로 캐스팅
+        Mono<ServerWebExchange> mutated = exchange.getPrincipal()
                 .cast(JwtAuthenticationToken.class)
-                // JwtAuthenticationToken 에서 JWT 객체 꺼내기
-                .map(token -> token.getToken().getClaimAsString("userId"))
-                // userId claim이 빈 문자열이 아니면 계속, 아니면 이 Mono는 empty
-                .filter(StringUtils::hasText)
-                // userId가 있을 경우에만 ServerWebExchange를 새로운 요청으로 재구성
-                .map(userId -> {
-                    // 기존 요청에 X-User-Id 헤더를 추가
-                    ServerHttpRequest newReq = exchange.getRequest()
-                            .mutate()
+                // 토큰에서 userId, roles 추출
+                .map(token -> {
+                    String userId = token.getToken().getClaimAsString("userId");
+
+                    // 권한 정보 추출 (GrantedAuthority 에서 권한 문자열만)
+                    String roles = token.getAuthorities().stream()
+                            .map(GrantedAuthority::getAuthority)
+                            .collect(Collectors.joining(","));
+
+                    // userId, roles 헤더를 모두 추가
+                    ServerHttpRequest request = exchange.getRequest().mutate()
                             .header("X-User-Id", userId)
+                            .header("X-User-Roles", roles)
                             .build();
-                    // 새로 만든 request로 exchange도 다시 빌드
-                    return exchange.mutate().request(newReq).build();
+
+                    return exchange.mutate().request(request).build();
                 })
-                // userId claim이 없거나 인증 정보가 없으면 원본 exchange 사용
+                // 인증 정보가 없거나 claim이 비어있으면 원본 exchange 사용
                 .defaultIfEmpty(exchange);
 
-        // 2) 최종적으로 구성된 exchangeMono를 chain.filter에 전달하여 Mono<Void>로 반환
-        return exchangeMono.flatMap(chain::filter);
+        return mutated.flatMap(chain::filter);
     }
 
     @Override
