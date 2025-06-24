@@ -24,6 +24,7 @@ import rice_monkey.member.JWT.JWTFilter;
 import rice_monkey.member.JWT.JWTUtil;
 import rice_monkey.member.JWT.LoginFilter;
 import rice_monkey.member.oauth.CustomOAuth2UserService;
+import rice_monkey.member.oauth.repository.CustomClientRegistrationRepository;
 
 import java.util.Collections;
 
@@ -37,6 +38,7 @@ public class WebSecurityConfig {
     private final AuthenticationConfiguration authenticationConfiguration;
     private final JWTUtil jwtUtil;
     private final CustomOAuth2UserService customOAuth2UserService;
+    private final CustomClientRegistrationRepository  customClientRegistrationRepository;
 
 
     @Bean
@@ -64,6 +66,7 @@ public class WebSecurityConfig {
 
         http
                 .oauth2Login((oauth2) -> oauth2
+                        .clientRegistrationRepository(customClientRegistrationRepository.getClientRegistrationRepository())
                         .userInfoEndpoint((userInfoEndpointConfig) -> userInfoEndpointConfig
                                 .userService(customOAuth2UserService)));
 
