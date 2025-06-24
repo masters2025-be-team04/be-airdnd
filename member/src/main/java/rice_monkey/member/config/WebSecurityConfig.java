@@ -3,95 +3,61 @@ package rice_monkey.member.config;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-import rice_monkey.member.JWT.JWTFilter;
-import rice_monkey.member.JWT.JWTUtil;
-import rice_monkey.member.JWT.LoginFilter;
-import rice_monkey.member.oauth.CustomOAuth2UserService;
 
-import java.util.Collections;
+import static org.springframework.boot.autoconfigure.security.servlet.PathRequest.toH2Console;
 
 @RequiredArgsConstructor
-@EnableWebSecurity
 @Configuration
 public class WebSecurityConfig {
 
-    private final AuthenticationConfiguration authenticationConfiguration;
-    private final JWTUtil jwtUtil;
-    private final CustomOAuth2UserService customOAuth2UserService;
+    private final UserDetailsService userService;
 
     @Bean
-    @Order(1)
-    public SecurityFilterChain jwtSecurityFilterChain(HttpSecurity http) throws Exception {
-        http
-                .securityMatcher("/api/**")
-                .csrf(AbstractHttpConfigurer::disable)
-                .formLogin(AbstractHttpConfigurer::disable)
-                .httpBasic(AbstractHttpConfigurer::disable)
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/login", "/api/signup").permitAll()
-                        .anyRequest().authenticated()
-                )
-                .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil), UsernamePasswordAuthenticationFilter.class)
-                .addFilterBefore(new JWTFilter(jwtUtil), LoginFilter.class)
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()));
-
-        return http.build();
+    public WebSecurityCustomizer configure(){
+        return (web) -> web.ignoring()
+                .requestMatchers(toH2Console())
+                .requestMatchers("/static/**");
     }
 
+    // 특정 HTTP 요청에 대한 웹 기반 보안 구성
     @Bean
-    @Order(2)
-    public SecurityFilterChain oauth2SecurityFilterChain(HttpSecurity http) throws Exception {
-        http
-                .csrf(AbstractHttpConfigurer::disable)
-                .formLogin(AbstractHttpConfigurer::disable)
-                .httpBasic(AbstractHttpConfigurer::disable)
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        return http
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/login/**", "/signup", "/oauth2/**").permitAll()
-                        .requestMatchers("/admin").hasRole("ADMIN")
+                        .requestMatchers("/login", "/signup", "/user").permitAll()
                         .anyRequest().authenticated()
                 )
-                .oauth2Login(oauth2 -> oauth2
-                        .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
+                .formLogin(form -> form
+                        .loginPage("/login")
+                        .defaultSuccessUrl("/articles")
                 )
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()));
-
-        return http.build();
+                .logout(logout -> logout
+                        .logoutSuccessUrl("/login")
+                        .invalidateHttpSession(true)
+                )
+                .csrf(csrf -> csrf.disable())
+                .build();
     }
 
+    // 인증 관리자 관련 설정
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
         return configuration.getAuthenticationManager();
     }
 
+    // 패스워드 인코더로 사용할 빈 등록
     @Bean
-    public BCryptPasswordEncoder bCryptPasswordEncoder() {
+    public BCryptPasswordEncoder bCryptPasswordEncoder(){
         return new BCryptPasswordEncoder();
     }
 
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        return request -> {
-            CorsConfiguration config = new CorsConfiguration();
-            config.setAllowedOrigins(Collections.singletonList("http://localhost:3000"));
-            config.setAllowedMethods(Collections.singletonList("*"));
-            config.setAllowedHeaders(Collections.singletonList("*"));
-            config.setAllowCredentials(true);
-            config.setMaxAge(3600L);
-            config.setExposedHeaders(Collections.singletonList("Authorization"));
-            return config;
-        };
-    }
+
 }

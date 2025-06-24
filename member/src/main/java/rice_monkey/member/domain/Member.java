@@ -9,7 +9,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import rice_monkey.member.oauth.OauthProvider;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -55,11 +54,6 @@ public class Member implements UserDetails {
     @Column(name = "img_url")
     private String imgUrl;
 
-    public Member(String loginId, String role) {
-        this.loginId = loginId;
-        this.role = MemberRole.valueOf(role);
-    }
-
     public void setDeleted(Boolean deleted) {
         isDeleted = deleted;
     }
@@ -86,23 +80,16 @@ public class Member implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        Collection<GrantedAuthority> authorities = new ArrayList<>();
-        authorities.add(new GrantedAuthority() {
-            @Override
-            public String getAuthority() {
-                return "ROLE_" + getRole().name();
-            }
-        });
-                return authorities;
+        return List.of();
     }
 
     @Override
     public String getPassword() {
-        return  password;
+        return "";
     }
 
     @Override
     public String getUsername() {
-        return loginId;
+        return "";
     }
 }
