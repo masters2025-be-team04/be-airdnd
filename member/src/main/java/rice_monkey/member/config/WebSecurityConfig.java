@@ -16,6 +16,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import rice_monkey.member.JWT.JWTFilter;
 import rice_monkey.member.JWT.JWTUtil;
 import rice_monkey.member.JWT.LoginFilter;
 
@@ -67,9 +68,12 @@ public class WebSecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
         //직접 만든 로그인 필터 등록
-
         http
                 .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration),jwtUtil), UsernamePasswordAuthenticationFilter.class);
+
+        //JwtFilter 등록
+        http
+                .addFilterBefore(new JWTFilter(jwtUtil) , LoginFilter.class);
 
         return http.build();
     }
