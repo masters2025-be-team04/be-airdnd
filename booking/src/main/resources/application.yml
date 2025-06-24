@@ -1,68 +1,23 @@
 spring:
   application:
-    name: booking-svc
+    name: booking
 
   # 1. RDS (MySQL) 데이터소스 설정
   datasource:
     url: jdbc:mysql://${RDS_HOST}:${RDS_PORT}/${RDS_DB}
     username: ${RDS_USER}
-    password: ${RDS_PASS:}
+    password: ${RDS_PASS}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
     hibernate:
-      ddl-auto: validate
-    show-sql: false
+      ddl-auto: create
     properties:
       hibernate:
         format_sql: true
 
-  # 2. Redis(분산락) 설정
   data:
     redis:
       host: ${REDIS_HOST}
       port: ${REDIS_PORT}
-      password: ${REDIS_PASS:}
-  # 3. Kafka (Producer + Consumer) 설정
-  kafka:
-    bootstrap-servers: ${KAFKA_BOOTSTRAP}
-
-    producer:
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
-
-    consumer:
-      group-id: booking-svc-group
-      auto-offset-reset: earliest
-      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
-      properties:
-        spring.json.trusted.packages: '*'   # 이벤트 DTO 패키지
-
-    listener:
-      missing-topics-fatal: false
-
-# 4. Feign Client 설정 (listing-svc, payment-svc)
-  cloud:
-    openfeign:
-      client:
-        config:
-          listing-svc:
-            url: ${LISTING_SVC_URL}
-          payment-svc:
-            url: ${PAYMENT_SVC_URL}
-
-# 5. Actuator (모니터링/헬스체크)
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health,info,metrics,prometheus
-
-server:
-  port: ${SERVER_PORT}
-
-logging:
-  level:
-    root: INFO
-    rice_monkey.booking: DEBUG
+      password: ${REDIS_PASS}

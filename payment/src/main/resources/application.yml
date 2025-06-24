@@ -1,0 +1,20 @@
+spring:
+  application:
+    name: payment
+
+  datasource:
+    url: jdbc:mysql://${RDS_HOST}:${RDS_PORT}/${RDS_DB}
+    username: ${RDS_USER}
+    password: ${RDS_PASS}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: create
+    properties:
+      hibernate:
+        format_sql: true
+
+toss:
+  secret-key: ${TOSS_SECRET_KEY}
+
