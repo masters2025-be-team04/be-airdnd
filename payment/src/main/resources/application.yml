@@ -1,8 +1,7 @@
 spring:
   application:
-    name: booking
+    name: payment
 
-  # 1. RDS (MySQL) 데이터소스 설정
   datasource:
     url: jdbc:mysql://${RDS_HOST}:${RDS_PORT}/${RDS_DB}
     username: ${RDS_USER}
@@ -16,8 +15,6 @@ spring:
       hibernate:
         format_sql: true
 
-  data:
-    redis:
-      host: ${REDIS_HOST}
-      port: ${REDIS_PORT}
-      password: ${REDIS_PASS}
+toss:
+  secret-key: ${TOSS_SECRET_KEY}
+
