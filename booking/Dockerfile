@@ -3,7 +3,7 @@ FROM openjdk:21-jdk-bullseye AS builder
 WORKDIR /home/gradle/project
 COPY . .
 RUN chmod +x ./gradlew && \
-    ./gradlew clean bootJar --no-daemon --stacktrace --info
+    ./gradlew build -x test
 
 # Stage 2: Runtime
 FROM openjdk:21-jdk-bullseye
