@@ -9,6 +9,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import rice_monkey.member.oauth.OauthProvider;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -80,7 +81,14 @@ public class Member implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of();
+        Collection<GrantedAuthority> authorities = new ArrayList<>();
+        authorities.add(new GrantedAuthority() {
+            @Override
+            public String getAuthority() {
+                return "ROLE_" + getRole().name();
+            }
+        });
+                return authorities;
     }
 
     @Override
@@ -90,6 +98,6 @@ public class Member implements UserDetails {
 
     @Override
     public String getUsername() {
-        return  loginId;
+        return loginId;
     }
 }
