@@ -55,6 +55,11 @@ public class Member implements UserDetails {
     @Column(name = "img_url")
     private String imgUrl;
 
+    public Member(String loginId, String role) {
+        this.loginId = loginId;
+        this.role = MemberRole.valueOf(role);
+    }
+
     public void setDeleted(Boolean deleted) {
         isDeleted = deleted;
     }
