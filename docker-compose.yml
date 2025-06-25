@@ -1,0 +1,123 @@
+services:
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: airdnd
+      MYSQL_USER: dev
+      MYSQL_PASSWORD: devpw
+    ports: ["3306:3306"]
+    networks:
+    - airdnd-local-net
+
+
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    ports: ["6379:6379"]
+    networks:
+    - airdnd-local-net
+
+
+  access_gateway:
+    build:
+        dockerfile: Dockerfile
+        context: ./access_gateway
+    ports: ["8080:8080"]
+    depends_on:
+    - mysql
+    - redis
+    networks:
+    - airdnd-local-net
+
+  listing:
+    build:
+      dockerfile: Dockerfile
+      context: ./listing
+    expose:
+      - "8081"
+    depends_on:
+    - mysql
+    - redis
+    - access_gateway
+    networks:
+    - airdnd-local-net
+
+  booking:
+    build:
+      dockerfile: Dockerfile
+      context: ./booking
+    expose:
+      - "8080"
+    depends_on:
+    - mysql
+    - redis
+    - access_gateway
+    networks:
+      - airdnd-local-net
+    env_file:
+      - ./booking/.env
+
+  payment:
+    build:
+      dockerfile: Dockerfile
+      context: ./payment
+    expose:
+      - "8080"
+    depends_on:
+    - mysql
+    - redis
+    - access_gateway
+    networks:
+      - airdnd-local-net
+    env_file:
+      - ./payment/.env
+
+  member:
+    build:
+      dockerfile: Dockerfile
+      context: ./member
+    expose:
+      - "8080"
+    depends_on:
+    - mysql
+    - redis
+    - access_gateway
+    networks:
+      - airdnd-local-net
+
+  image:
+    build:
+      dockerfile: Dockerfile
+      context: ./image
+    expose:
+      - "8080"
+    depends_on:
+    - mysql
+    - redis
+    - access_gateway
+    networks:
+      - airdnd-local-net
+
+  messaging:
+    build:
+      dockerfile: Dockerfile
+      context: ./messaging
+    expose:
+      - "8080"
+    depends_on:
+    - mysql
+    - redis
+    - access_gateway
+    networks:
+      - airdnd-local-net
+
+
+
+networks:
+  airdnd-local-net:
+    driver: bridge
+
+volumes:
+  mysql_data:

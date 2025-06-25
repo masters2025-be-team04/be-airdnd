@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 @FeignClient(
         name = "booking",
-        url = "http://localhost:8080"
+        url = "http://booking:8080"
 )
 public interface BookingClient {
 
