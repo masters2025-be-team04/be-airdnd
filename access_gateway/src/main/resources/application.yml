@@ -5,14 +5,26 @@ spring:
         webflux:
           routes:
           - id: listing
-            uri: ${LISTING_SERVICE_URL:http://localhost:8080}
+            uri: ${LISTING_SERVICE_URL:http://listing:8080}
             predicates:
               - Path=/api/listings/**
           - id: booking
-            uri: ${BOOKING_SERVICE_URL:http://localhost:8081}
+            uri: ${BOOKING_SERVICE_URL:http://booking:8080}
             predicates:
               - Path=/api/bookings/**
           - id: payment
-            uri: ${PAYMENT_SERVICE_URL:http://localhost:8082}
+            uri: ${PAYMENT_SERVICE_URL:http://payment:8080}
             predicates:
               - Path=/api/payments/**
+          - id: member
+            uri: ${MEMBER_SERVICE_URL:http://member:8080}
+            predicates:
+              - Path=/api/members/**
+          - id: image
+            uri: ${IMAGE_SERVICE_URL:http://image:8080}
+            predicates:
+              - Path=/api/images/**
+          - id: messaging
+            uri: ${MESSAGING_SERVICE_URL:http://messaging:8080}
+            predicates:
+              - Path=/api/messaging/**
