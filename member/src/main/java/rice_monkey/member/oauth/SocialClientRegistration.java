@@ -1,20 +1,41 @@
 package rice_monkey.member.oauth;
 
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.oidc.IdTokenClaimNames;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
 public class SocialClientRegistration {
+
+    @Value("${oauth.naver.client-id}")
+    private String naverClientId;
+
+    @Value("${oauth.naver.client-secret}")
+    private String naverClientSecret;
+
+    @Value("${oauth.naver.redirect-uri}")
+    private String naverRedirectUri;
+
+    @Value("${oauth.google.client-id}")
+    private String googleClientId;
+
+    @Value("${oauth.google.client-secret}")
+    private String googleClientSecret;
+
+    @Value("${oauth.google.redirect-uri}")
+    private String googleRedirectUri;
 
     public ClientRegistration naverClientRegistration() {
         return ClientRegistration.withRegistrationId("naver")
-                .clientId("_aP2k2ZsD3wuUeBDO8ye")
-                .clientSecret("ew8I45ZMBO")
-                .redirectUri("http://localhost:8080/login/oauth2/code/naver")
+                .clientId(naverClientId)
+                .clientSecret(naverClientSecret)
+                .redirectUri(naverRedirectUri)
                 .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
-                .scope("name", "email","nickname")
+                .scope("name", "email", "nickname")
                 .authorizationUri("https://nid.naver.com/oauth2.0/authorize")
                 .tokenUri("https://nid.naver.com/oauth2.0/token")
                 .userInfoUri("https://openapi.naver.com/v1/nid/me")
@@ -23,11 +44,10 @@ public class SocialClientRegistration {
     }
 
     public ClientRegistration googleClientRegistration() {
-
         return ClientRegistration.withRegistrationId("google")
-                .clientId("102444491141-3llf3kiekkc5bekibc3o38ca7d7qbu99.apps.googleusercontent.com")
-                .clientSecret("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")
-                .redirectUri("http://localhost:8080/login/oauth2/code/google")
+                .clientId(googleClientId)
+                .clientSecret(googleClientSecret)
+                .redirectUri(googleRedirectUri)
                 .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
                 .scope("profile", "email")
                 .authorizationUri("https://accounts.google.com/o/oauth2/v2/auth")
