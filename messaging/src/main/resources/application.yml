@@ -1,0 +1,26 @@
+spring:
+  application:
+    name: messaging
+
+  datasource:
+    url: jdbc:mysql://${RDS_HOST}:${RDS_PORT}/${RDS_DB}
+    username: ${RDS_USER}
+    password: ${RDS_PASS}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+      password: ${REDIS_PASS}
+
+    mongodb:
+      uri: mongodb://${MONGO_HOST}:${MONGO_PORT}/${MONGO_DB}
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+    show-sql: true

@@ -9,8 +9,14 @@ services:
     ports: ["3306:3306"]
     networks:
     - airdnd-local-net
+    -
 
-
+  mongo:
+    image: mongo:6.0
+    ports:
+      - "27017:27017"
+    networks:
+      - airdnd-local-net
 
   redis:
     image: redis:7-alpine
@@ -38,11 +44,18 @@ services:
     expose:
       - "8081"
     depends_on:
-    - mysql
-    - redis
-    - access_gateway
+      - mysql
+      - redis
+      - access_gateway
     networks:
-    - airdnd-local-net
+      - airdnd-local-net
+    environment:
+      # MySQL 환경변수
+      RDS_HOST: mysql
+      RDS_PORT: 3306
+      RDS_DB: airdnd
+      RDS_USER: dev
+      RDS_PASS: devpw
 
   booking:
     build:
@@ -81,11 +94,26 @@ services:
     expose:
       - "8080"
     depends_on:
-    - mysql
-    - redis
-    - access_gateway
+      - mysql
+      - redis
+      - access_gateway
     networks:
       - airdnd-local-net
+    environment:
+      # MySQL
+      RDS_HOST: mysql
+      RDS_PORT: 3306
+      RDS_DB: airdnd
+      RDS_USER: dev
+      RDS_PASS: devpw
+
+      # OAuth - Naver
+      NAVER_CLIENT_ID: _aP2k2ZsD3wuUeBDO8ye
+      NAVER_CLIENT_SECRET: ew8I45ZMBO
+
+      # OAuth - Google
+      GOOGLE_CLIENT_ID: 102444491141-3llf3kiekkc5bekibc3o38ca7d7qbu99.apps.googleusercontent.com
+      GOOGLE_CLIENT_SECRET: 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
 
   image:
     build:
@@ -94,11 +122,24 @@ services:
     expose:
       - "8080"
     depends_on:
-    - mysql
-    - redis
-    - access_gateway
+      - mysql
+      - redis
+      - access_gateway
     networks:
       - airdnd-local-net
+    environment:
+      # MySQL
+      RDS_HOST: mysql
+      RDS_PORT: 3306
+      RDS_DB: airdnd
+      RDS_USER: dev
+      RDS_PASS: devpw
+
+      # S3
+      S3_BUCKET: your-s3-bucket-name
+      AWS_ACCESS_KEY: your-access-key
+      AWS_SECRET_KEY: your-secret-key
+
 
   messaging:
     build:
@@ -107,11 +148,30 @@ services:
     expose:
       - "8080"
     depends_on:
-    - mysql
-    - redis
-    - access_gateway
+      - mysql
+      - redis
+      - mongo
+      - access_gateway
     networks:
       - airdnd-local-net
+    environment:
+      # MySQL
+      RDS_HOST: mysql
+      RDS_PORT: 3306
+      RDS_DB: airdnd
+      RDS_USER: dev
+      RDS_PASS: devpw
+
+      # Redis
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASS:
+
+      # MongoDB
+      MONGO_HOST: mongo
+      MONGO_PORT: 27017
+      MONGO_DB: messagingdb
+
 
 
 

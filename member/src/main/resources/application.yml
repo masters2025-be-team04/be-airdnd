@@ -1,3 +1,21 @@
+spring:
+  application:
+    name: member
+
+  datasource:
+    url: jdbc:mysql://${RDS_HOST}:${RDS_PORT}/${RDS_DB}
+    username: ${RDS_USER}
+    password: ${RDS_PASS}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+    show-sql: true
+
 oauth:
   naver:
     client-id: ${NAVER_CLIENT_ID}

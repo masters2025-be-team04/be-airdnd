@@ -64,3 +64,6 @@ out/
 
 air-dnd-web
 terraform
+
+# Local Docker Compose 설정 무시
+docker-compose.yml

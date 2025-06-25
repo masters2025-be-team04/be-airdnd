@@ -1,0 +1,36 @@
+spring:
+  application:
+    name: image
+
+  # MySQL (RDS) 설정
+  datasource:
+    url: jdbc:mysql://${RDS_HOST}:${RDS_PORT}/${RDS_DB}
+    username: ${RDS_USER}
+    password: ${RDS_PASS}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update  # dev 환경이면 create도 가능
+    properties:
+      hibernate:
+        format_sql: true
+    show-sql: true
+
+  # AWS S3 설정
+cloud:
+  aws:
+    s3:
+      bucket: ${S3_BUCKET}
+    credentials:
+      access-key: ${AWS_ACCESS_KEY}
+      secret-key: ${AWS_SECRET_KEY}
+    region:
+      static: ap-northeast-2
+    stack:
+      auto: false
+
+# 파일 업로드 관련 설정 (선택 사항)
+file:
+  upload-dir: s3
+
