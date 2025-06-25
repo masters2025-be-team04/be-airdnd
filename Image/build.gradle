@@ -24,9 +24,12 @@ repositories {
 }
 
 dependencies {
-	// Spring Web + JPA (if needed later)
+	// Spring Web + JPA
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+
+	// MySQL 드라이버 추가
+	implementation 'mysql:mysql-connector-java:8.0.33'
 
 	// AWS SDK v2 - S3 업로드 용
 	implementation("software.amazon.awssdk:s3:2.20.100")
@@ -42,6 +45,7 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
+
 
 tasks.named('test') {
 	useJUnitPlatform()
