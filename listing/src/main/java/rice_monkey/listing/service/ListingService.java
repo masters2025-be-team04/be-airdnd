@@ -91,7 +91,7 @@ public class ListingService {
         }
         return responses;
     }
-    @Tra
+
     public ListingPricesMetaData getListingPricesMetaData() {
         List<Integer> allPrices = getAllPricesOnly();
         Map<Integer, Long> countPerPrice = getCountPerPrice(allPrices);

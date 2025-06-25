@@ -1,23 +1,29 @@
 package rice_monkey.member.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import rice_monkey.member.oauth.OauthProvider;
 import rice_monkey.member.domain.Member;
 import rice_monkey.member.domain.MemberRole;
 import rice_monkey.member.dto.SignupRequest;
 import rice_monkey.member.exception.DuplicateMemberException;
 import rice_monkey.member.fegin.ImageServiceClient;
+import rice_monkey.member.oauth.OauthProvider;
 import rice_monkey.member.repository.MemberRepository;
 import rice_monkey.member.util.PasswordEncoderUtil;
 
 @Service
 @RequiredArgsConstructor
-public class MemberService {
+public class MemberService implements UserDetailsService {
+
 
     private final MemberRepository memberRepository;
     private final ImageServiceClient imageServiceClient;
+    private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
     @Transactional
     public void signup(SignupRequest request){
@@ -33,14 +39,10 @@ public class MemberService {
             imageUrl=imageUploadResponse.url();
         }
 
-        String salt = PasswordEncoderUtil.generateSalt();
-        String hashedPassword = PasswordEncoderUtil.hashPassword(request.getPassword(), salt);
-
         Member member = Member.builder()
                 .loginId(request.getLoginId())
                 .nickname(request.getNickname())
-                .passwordSalt(salt)
-                .passwordHash(hashedPassword)
+                .password(bCryptPasswordEncoder.encode(request.getPassword()))
                 .role(MemberRole.USER)
                 .oauthProvider(OauthProvider.LOCAL)
                 .oauthId("local_" + request.getLoginId())
@@ -50,5 +52,15 @@ public class MemberService {
                 .build();
 
         memberRepository.save(member);
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String loginId) throws UsernameNotFoundException {
+        return memberRepository.findByLoginId(loginId)
+                .orElseThrow(() -> new UsernameNotFoundException("없는 사용자입니다."));
+    }
+
+    public void LogOut(Member member){
+        member.setDeleted(true);
     }
 }

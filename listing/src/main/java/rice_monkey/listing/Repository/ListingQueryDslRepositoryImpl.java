@@ -7,6 +7,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import rice_monkey.listing.domain.Listing;
+import rice_monkey.listing.domain.QClosedStayDate;
 import rice_monkey.listing.domain.QListing;
 import rice_monkey.listing.dto.ListingSearchCondition;
 
@@ -20,6 +21,7 @@ import static com.querydsl.core.types.dsl.Expressions.booleanTemplate;
 public class ListingQueryDslRepositoryImpl implements ListingQueryDslRepository {
 
     private final JPAQueryFactory queryFactory;
+    QClosedStayDate closedStayDate = QClosedStayDate.closedStayDate;
 
     @Override
     public List<Listing> getListingsFilteredByCondition(ListingSearchCondition condition) {
@@ -41,9 +43,14 @@ public class ListingQueryDslRepositoryImpl implements ListingQueryDslRepository 
     private void addDateCondition(ListingSearchCondition condition, BooleanBuilder builder, QListing listing) {
         if (condition.hasDateCondition()) {
             List<LocalDate> reservationDates = condition.getReservationDates();
-            builder.andNot(listing.closedStayDates.any().in(reservationDates));
+
+            builder.andNot(
+                    listing.closedStayDates.any().date.in(reservationDates)
+            );
         }
     }
+
+
 
     private void addGuestCountCondition(ListingSearchCondition condition, BooleanBuilder builder, QListing listing) {
         if (condition.hasGuestCountCondition()) {
