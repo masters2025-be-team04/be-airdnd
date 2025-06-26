@@ -7,6 +7,8 @@ import rice_monkey.messaging.dto.ChatRoomListGetResponse;
 import rice_monkey.messaging.fegin.MemberClient;
 import rice_monkey.messaging.handler.JwtTokenProvider;
 import rice_monkey.messaging.repository.ChatRoomRedisRepository;
+import rice_monkey.messaging.repository.ChatRoomRepository;
+
 import java.util.Comparator;
 import java.util.List;
 
@@ -17,6 +19,7 @@ public class ChatRoomService {
     private final JwtTokenProvider jwtTokenProvider;
     private final MemberClient memberClient;
     private final ChatRoomRedisRepository chatRoomRedisRepository;
+    private final ChatRoomRepository chatRoomRepository;
 
     /**
      * Redis에 채팅방이 없으면 Member 서비스에서 조회 후 Redis에 저장
@@ -62,13 +65,14 @@ public class ChatRoomService {
     }
 
     /**
-     * 채팅방 삭제 처리 (accessToken 확인 후 내 Redis에서 삭제)
+     * 채팅방 삭제 처리 (accessToken 확인 후 내 Redis,memberDb에서도 삭제)
      */
     public void deleteChatRoom(String accessToken, Long roomId, Long userId) {
         Long tokenUserId = jwtTokenProvider.getUserIdFromToken(accessToken);
         if (!tokenUserId.equals(userId)) {
             throw new IllegalArgumentException("본인의 채팅방만 삭제할 수 있습니다.");
         }
+        memberClient.deleteChatRoom(userId, roomId);
         chatRoomRedisRepository.deleteChatRoom(userId, roomId);
     }
 

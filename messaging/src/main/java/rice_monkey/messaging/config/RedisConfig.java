@@ -1,7 +1,6 @@
 package rice_monkey.messaging.config;
 
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,61 +19,65 @@ import rice_monkey.messaging.redis.RedisSubscriber;
 @Configuration
 public class RedisConfig {
 
-    // yml 파일 redis 설정 불러오기
+    // application.yml에 설정된 Redis 정보 주입
     private final RedisProperties redisProperties;
+
     /**
-     * 단일 Topic 사용을 위한 Bean 설정
+     * Redis Pub/Sub을 위한 채널 토픽 설정
      */
     @Bean
     public ChannelTopic channelTopic() {
         return new ChannelTopic("chatroom");
     }
 
+    /**
+     * Redis 접속 팩토리 설정 (Lettuce 사용)
+     */
     @Bean
     public RedisConnectionFactory redisConnectionFactory() {
-        LettuceConnectionFactory lettuceConnectionFactory = new LettuceConnectionFactory();
-        lettuceConnectionFactory.setHostName(redisProperties.getHost());
-        lettuceConnectionFactory.setPort(redisProperties.getPort());
-        return lettuceConnectionFactory;
+        LettuceConnectionFactory factory = new LettuceConnectionFactory();
+        factory.setHostName(redisProperties.getHost());
+        factory.setPort(redisProperties.getPort());
+        return factory;
     }
 
     /**
-     * redis 에 발행(publish)된 메시지 처리를 위한 리스너 설정
+     * Redis 메시지를 수신하기 위한 리스너 컨테이너 설정
+     * 두 개의 리스너(sendMessage, sendRoomList)를 같은 채널에 등록
      */
     @Bean
-    public RedisMessageListenerContainer redisMessageListener (
+    public RedisMessageListenerContainer redisMessageListenerContainer(
+            RedisConnectionFactory connectionFactory,
             MessageListenerAdapter listenerAdapterChatMessage,
+            MessageListenerAdapter listenerAdapterChatRoomList,
             ChannelTopic channelTopic
     ) {
         RedisMessageListenerContainer container = new RedisMessageListenerContainer();
-        container.setConnectionFactory(redisConnectionFactory());
+        container.setConnectionFactory(connectionFactory);
         container.addMessageListener(listenerAdapterChatMessage, channelTopic);
+        container.addMessageListener(listenerAdapterChatRoomList, channelTopic);
         return container;
     }
 
-    /** 실제 메시지를 처리하는 subscriber 설정 추가*/
+    /**
+     * RedisSubscriber의 sendMessage 메서드를 처리할 어댑터
+     */
     @Bean
     public MessageListenerAdapter listenerAdapterChatMessage(RedisSubscriber subscriber) {
         return new MessageListenerAdapter(subscriber, "sendMessage");
     }
 
-    @Bean
-    public RedisMessageListenerContainer redisMessageListenerRoomList (
-            MessageListenerAdapter listenerAdapterChatRoomList,
-            ChannelTopic channelTopic
-    ) {
-        RedisMessageListenerContainer container = new RedisMessageListenerContainer();
-        container.setConnectionFactory(redisConnectionFactory());
-        container.addMessageListener(listenerAdapterChatRoomList, channelTopic);
-        return container;
-    }
-
-    /** 실제 메시지 방을 처리하는 subscriber 설정 추가*/
+    /**
+     * RedisSubscriber의 sendRoomList 메서드를 처리할 어댑터
+     */
     @Bean
     public MessageListenerAdapter listenerAdapterChatRoomList(RedisSubscriber subscriber) {
         return new MessageListenerAdapter(subscriber, "sendRoomList");
     }
 
+    /**
+     * RedisTemplate 설정 (Key: String, Value: JSON 직렬화)
+     */
     @Bean
     public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory connectionFactory) {
         RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
@@ -82,12 +85,9 @@ public class RedisConfig {
 
         redisTemplate.setKeySerializer(new StringRedisSerializer());
         redisTemplate.setValueSerializer(new Jackson2JsonRedisSerializer<>(String.class));
-
         redisTemplate.setHashKeySerializer(new StringRedisSerializer());
         redisTemplate.setHashValueSerializer(new Jackson2JsonRedisSerializer<>(Object.class));
 
         return redisTemplate;
     }
-
 }
-
