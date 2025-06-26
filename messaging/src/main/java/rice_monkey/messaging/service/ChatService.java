@@ -35,6 +35,7 @@ public class ChatService {
         if (chatMessage.getType().equals(MessageType.DELETE)) {
             chatRoomService.deleteChatRoom(accessToken, chatMessage.getRoomId(), userId);
             chatRoomRedisRepository.deleteChatRoom(userId,chatMessage.getRoomId());
+            return ;
         }
 
         ChatRoomListGetResponse newChatRoomList = null;
